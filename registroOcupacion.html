@@ -90,48 +90,64 @@
 
       <!-- Modal -->
       <div
-      class="modal fade"
-      id="newRoomModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="newRoomModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="newRoomModalLabel">
-              Crear una nueva habitación
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form id="room-form">
-              <div class="form-group">
-                <label for="room-name">Nombre de la habitación:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="room-name"
-                  placeholder="Ingresa el nombre de la habitación"
-                  required
-                />
-              </div>
-              <button type="submit" class="btn btn-dark">Guardar</button>
-              <!-- Botón negro ajustado -->
-               <!-- Tabla que se mostrará después del formulario -->
-               <div class="table-responsive mt-4">
+        class="modal fade"
+        id="newRoomModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="newRoomModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="newRoomModalLabel">
+                Crear una nueva habitación
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <!-- Contenido del modal en reparacion-->
+            <div class="modal-body">
+              <form id="room-form">
+                <div class="form-group">
+                  <label for="room-name">Nombre de la habitación:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="room-name"
+                    placeholder="Ingresa el nombre de la habitación"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="room-quantity">Cantidad:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="room-quantity"
+                    min="1"
+                    max="30"
+                    required
+                    placeholder="Ingresa la cantidad de habitaciones"
+                  />
+                </div>
+                <button type="submit" class="btn btn-dark">Guardar</button>
+              </form>
+
+              <!-- Tabla que se mostrará después del formulario -->
+              <div class="table-responsive mt-4">
                 <table class="table table-bordered">
                   <thead>
                     <tr>
                       <th scope="col">Tipo de Habitación</th>
+                      <th scope="col">Cantidad</th>
                       <th scope="col">Acción</th>
                     </tr>
                   </thead>
@@ -140,13 +156,68 @@
                   </tbody>
                 </table>
               </div>
-            </form>
-    
-            
+            </div>
+            <!-- Contenido del modal en reparacion-->
+
+            <!-- Modal para Editar Tipo de Habitación -->
+            <div
+              class="modal fade"
+              id="modalEditarHabitacion"
+              tabindex="-1"
+              aria-labelledby="modalEditarHabitacionLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalEditarHabitacionLabel">
+                      Editar Tipo de Habitación
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="edit-room-form">
+                      <div class="form-group">
+                        <label for="edit-room-name"
+                          >Nombre de la habitación:</label
+                        >
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="edit-room-name"
+                          placeholder="Ingresa el nuevo nombre de la habitación"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="edit-room-quantity">Cantidad:</label>
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="edit-room-quantity"
+                          min="1"
+                          max="30"
+                          required
+                          placeholder="Ingresa la nueva cantidad de habitaciones"
+                        />
+                      </div>
+                      <button type="submit" class="btn btn-dark">
+                        Actualizar
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Modal para editar tipo de habitación -->
           </div>
         </div>
       </div>
-    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -158,6 +229,11 @@
           e.preventDefault();
 
           const roomName = document.getElementById("room-name").value;
+          const roomQuantity = parseInt(
+            document.getElementById("room-quantity").value,
+            10
+          );
+
           if (roomName.length < 3) {
             Swal.fire(
               "Error",
@@ -167,18 +243,28 @@
             return;
           }
 
+          if (roomQuantity < 1 || roomQuantity > 30) {
+            Swal.fire("Error", "La cantidad debe estar entre 1 y 30.", "error");
+            return;
+          }
+
           axios
             .post("http://localhost:3000/tipohabitaciones", {
               tipo: roomName,
+              cantidad: roomQuantity,
             })
             .then(function (response) {
-              Swal.fire("¡Se guardó correctamente!", response.data.message, "success");
+              Swal.fire(
+                "¡Se guardó correctamente!",
+                "Tipo de habitación registrado exitosamente.",
+                "success"
+              );
 
-              // Limpiar el campo de entrada
+              // Limpiar los campos de entrada
               document.getElementById("room-name").value = "";
-
-              // Cerrar el modal
-              $("#newRoomModal").modal("hide");
+              document.getElementById("room-quantity").value = "";
+              fetchHabitaciones();
+           
 
               // Actualizar dinámicamente la lista de habitaciones sin recargar la página
               actualizarHabitaciones();
@@ -279,46 +365,143 @@
             console.error("Error al obtener los tipos de habitación:", error);
           });
       });
+
+      // Manejador del formulario de edición
+      document
+        .getElementById("edit-room-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const nombre = document.getElementById("edit-room-name").value.trim(); // Eliminar espacios
+          const cantidad = document.getElementById("edit-room-quantity").value;
+
+          // Validación para el nombre de la habitación
+          if (nombre.length < 3 || nombre.length > 30) {
+            Swal.fire(
+              "Error",
+              "El nombre de la habitación debe tener entre 3 y 30 caracteres.",
+              "error"
+            );
+            return; // Detener el proceso si no cumple la validación
+          }
+
+          // Si pasa la validación, continuar con la actualización
+          axios
+            .put(
+              `http://localhost:3000/tipohabitaciones/${habitacionIdSeleccionada}`,
+              { tipo: nombre, cantidad: cantidad }
+            )
+            .then(function (response) {
+              $("#modalEditarHabitacion").modal("hide"); // Usar jQuery para ocultar el modal
+
+              fetchHabitaciones();
+              Swal.fire(
+                "Actualización exitosa",
+                "El tipo de habitación ha sido actualizado.",
+                "success"
+              );
+            })
+            .catch(function (error) {
+              console.error(
+                "Error al actualizar el tipo de habitación:",
+                error
+              );
+              Swal.fire(
+                "Error",
+                "No se pudo actualizar el tipo de habitación.",
+                "error"
+              );
+            });
+        });
     </script>
 
-<script>
-   // Asegúrate de que el DOM esté completamente cargado
-document.addEventListener('DOMContentLoaded', function () {
-  // Función para obtener los tipos de habitación
-  function fetchHabitaciones() {
-    axios.get('http://localhost:3000/tipohabitaciones') // Reemplaza con tu URL real
-      .then(function (response) {
-        const habitaciones = response.data;
-        const tableBody = document.getElementById('habitaciones-table-body');
-        tableBody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+    <script>
+      let habitacionIdSeleccionada = null;
 
-        habitaciones.forEach((habitacion) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${habitacion.tipo}</td>
-           <td class="text-center">
-  <i class="fas fa-pencil-alt text" style="cursor: pointer;" onclick="editarHabitacion(${habitacion.idtipo})"></i>
-</td>
+      // Función para abrir el modal y cargar los datos de la habitación
+      function editarHabitacion(id) {
+        habitacionIdSeleccionada = id;
 
-          `;
-          tableBody.appendChild(tr);
+        const fila = document.querySelector(`tr[data-id="${id}"]`);
+        const nombre = fila.querySelector(".nombre-habitacion").innerText;
+        const cantidad = fila.querySelector(".cantidad-habitacion").innerText;
+
+        document.getElementById("edit-room-name").value = nombre;
+        document.getElementById("edit-room-quantity").value = cantidad;
+
+        $("#modalEditarHabitacion").modal("show"); // Usar jQuery para mostrar el modal
+      }
+
+      // Manejador del formulario de edición
+      document
+        .getElementById("edit-room-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const nombre = document.getElementById("edit-room-name").value;
+          const cantidad = document.getElementById("edit-room-quantity").value;
+
+          axios
+            .put(
+              `http://localhost:3000/tipohabitaciones/${habitacionIdSeleccionada}`,
+              { tipo: nombre, cantidad: cantidad }
+            )
+            .then(function (response) {
+              $("#modalEditarHabitacion").modal("hide"); // Usar jQuery para ocultar el modal
+
+              fetchHabitaciones();
+              Swal.fire(
+                "Actualización exitosa",
+                "El tipo de habitación ha sido actualizado.",
+                "success"
+              );
+            })
+            .catch(function (error) {
+              console.error(
+                "Error al actualizar el tipo de habitación:",
+                error
+              );
+              Swal.fire(
+                "Error",
+                "No se pudo actualizar el tipo de habitación.",
+                "error"
+              );
+            });
         });
-      })
-      .catch(function (error) {
-        console.error('Error al obtener los tipos de habitación:', error);
-      });
-  }
 
-  // Llamamos a la función para cargar los tipos de habitación al iniciar la página
-  fetchHabitaciones();
-});
+      // Función para obtener los tipos de habitación
+      function fetchHabitaciones() {
+        axios
+          .get("http://localhost:3000/tipohabitaciones")
+          .then(function (response) {
+            const habitaciones = response.data;
+            const tableBody = document.getElementById(
+              "habitaciones-table-body"
+            );
+            tableBody.innerHTML = "";
 
-// Función de ejemplo para editar (aún sin implementación en backend)
-function editarHabitacion(id) {
-  alert('Editar habitación con ID: ' + id);
-}
+            habitaciones.forEach((habitacion) => {
+              const tr = document.createElement("tr");
+              tr.setAttribute("data-id", habitacion.idtipo);
+              tr.innerHTML = `
+            <td class="nombre-habitacion">${habitacion.tipo}</td>
+            <td class="cantidad-habitacion">${habitacion.cantidad}</td>
+            <td class="text-center">
+              <i class="fas fa-pencil-alt" style="cursor: pointer;" onclick="editarHabitacion(${habitacion.idtipo})"></i>
+            </td>
+          `;
+              tableBody.appendChild(tr);
+            });
+          })
+          .catch(function (error) {
+            console.error("Error al obtener los tipos de habitación:", error);
+          });
+      }
 
-</script>
+      // Cargar los tipos de habitación al iniciar la página
+      fetchHabitaciones();
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

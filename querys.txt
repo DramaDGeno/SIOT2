@@ -1,0 +1,40 @@
+CREATE DATABASE observatorio;
+USE observatorio;
+
+
+Select * From tipohabitacion;
+Select * From historico;
+
+drop database observatorio;
+drop table historico;
+
+CREATE TABLE tipohabitacion (
+    idtipo INT PRIMARY KEY AUTO_INCREMENT,  
+    tipo VARCHAR(50) NOT NULL UNIQUE,      
+    cantidad INT NOT NULL               
+);
+
+CREATE TABLE historico (
+    idhistorial INT PRIMARY KEY AUTO_INCREMENT, -- ID único para cada registro
+    idtipo INT,                                 -- Referencia al tipo de habitación (FK)
+    fecha DATE NOT NULL,                        -- Fecha del registro
+    habitacionesocupadas INT NOT NULL,          -- Cantidad de habitaciones ocupadas
+    habitacionestotales INT NOT NULL,           -- Total de habitaciones disponibles (siempre 20, por ahora)
+    FOREIGN KEY (idtipo) REFERENCES tipohabitacion(idtipo) -- Clave foránea a la tabla tipohabitacion
+);
+
+INSERT INTO tipohabitacion (tipo, cantidad) VALUES
+('Sencilla', 10),
+('Doble', 5),
+('Suite', 3),
+('Familiar', 2);
+
+INSERT INTO historico (idtipo, fecha, habitacionesocupadas, habitacionestotales) VALUES
+(1, '2024-10-01', 5, 20),  -- Registro para tipo de habitación con idtipo = 1 (Sencilla)
+(2, '2024-10-02', 3, 20),  -- Registro para tipo de habitación con idtipo = 2 (Doble)
+(3, '2024-10-03', 2, 20);  -- Registro para tipo de habitación con idtipo = 3 (Suite)
+
+SELECT fecha, tipo, habitacionesocupadas, habitacionestotales
+FROM tipohabitacion a
+INNER JOIN historico b
+ON a.idtipo = b.idtipo;

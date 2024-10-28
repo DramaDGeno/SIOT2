@@ -1,20 +1,113 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro de ocupación hotelera</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
-    <link rel="stylesheet" href="/css/stylehistorial.css" />
-  </head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registro de ocupación hotelera</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/stylehistorial.css" />
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <button class="btn btn-dark">
+            Registrar habitaciones reservadas
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='historial.html'">Histórico</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark">Cerrar sesión</button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Título y línea de separación -->
+  <div class="header">
+    <h1>Histórico</h1>
+    <div class="separator"></div>
+  </div>
+
+
+  <table id="historial-table" class="table">
+    <thead>
+        <tr>
+            <th data-field="fecha" data-sortable="true">Fecha</th>
+            <th data-field="tipo">Tipo de Habitación</th>
+            <th data-field="habitacionesocupadas" data-sortable="true">Habitaciones Ocupadas</th>
+            <th data-field="habitacionestotales" data-sortable="true">Habitaciones Totales</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Las filas se llenarán dinámicamente aquí -->
+    </tbody>
+</table>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script>
+    $(document).ready(function() {
+    // Usamos fetch para obtener los datos de la API
+    fetch('http://127.0.0.1:3000/api/historial')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al obtener el historial');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Llenar la tabla con los datos
+            const tableBody = $('#historial-table tbody');
+            tableBody.empty(); // Limpiar la tabla antes de llenarla
+
+            data.forEach(item => {
+                const fechaFormateada = new Date(item.fecha).toLocaleDateString(); // Formato legible
+                const row = `<tr>
+                    <td>${fechaFormateada}</td>
+                    <td>${item.tipo}</td>
+                    <td>${item.habitacionesocupadas}</td>
+                    <td>${item.habitacionestotales}</td>
+                </tr>`;
+                tableBody.append(row);
+            });
+
+            // Inicializar bootstrap-table después de llenar los datos
+            $('#historial-table').bootstrapTable('load', data); // Cargar los datos manualmente
+        })
+        .catch(error => {
+            console.error(error);
+        });
+});
+
+</script>
+
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

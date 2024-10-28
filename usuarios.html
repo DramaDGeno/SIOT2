@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/styleUsuarios.css">
+    <title>Usuarios</title>
+</head>
+
+<body>
+
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'"> Registrar
+                        habitaciones reservadas</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='historial.html'">Histórico</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark">Cerrar sesión</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="header">
+        <h1>Usuarios</h1>
+        <div class="separator"></div>
+      </div>
+
+
+    <div class="container">
+        <table
+            id="usuarios-table"
+            data-toggle="table"
+            data-url="/api/usuarios" 
+            data-sort-name="id"  
+            data-sort-order="asc"  
+            class="table"
+        >
+            <thead>
+                <tr>
+                    <th data-field="nombre">Nombre</th>
+                    <th data-field="usuario">Correo</th>
+                    <th data-field="password">Contraseña</th>
+                    <th data-field="rol">Rol</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div class="text-center">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newUserModal">
+            Crear Nuevo Usuario
+        </button>
+    </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="newUserModal" tabindex="-1" role="dialog" aria-labelledby="newUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newUserModalLabel">Crear Nuevo Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <div class="form-group">
+                        <label for="full-name">Nombre Completo:</label>
+                        <input type="text" class="form-control" id="full-name" placeholder="Ingresa tu nombre completo" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" class="form-control" id="username" placeholder="Ingresa un nombre de usuario" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" class="form-control" id="password" placeholder="Ingresa una contraseña" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Rol:</label>
+                        <select class="form-control" id="role" required>
+                            <option value="" disabled selected>Selecciona un rol</option>
+                            <option value="admin">Administrador</option>
+                            <option value="user">Usuario</option>
+                        </select>
+                    </div>
+                    <button type="submit">Crear Usuario </button> <!-- Botón negro ajustado -->
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
