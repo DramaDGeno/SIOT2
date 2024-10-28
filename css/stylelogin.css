@@ -1,0 +1,72 @@
+body {
+    background-color: rgb(236, 235, 235);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.navbar {
+    transition: justify-content 0.3s; /* Suaviza la transición al cambiar el contenido */
+    background-color: rgb(236, 235, 235);
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        justify-content: center; /* Centra el contenido en pantallas pequeñas */
+    }
+}
+
+
+.divider {
+    height: 100%;
+    width: 1px;
+    background-color: rgb(146, 146, 146);
+    position: absolute;
+    left: 0%;
+    top: 0;
+}
+
+.container-fluid {
+    margin-top: 100px;
+}
+
+.form-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%; /* Ancho completo en pantallas pequeñas */
+    max-width: 700px; /* Ancho máximo del contenedor */
+    height: 400px; /* Ancho máximo del contenedor */
+}
+
+.dependencia{
+    width: 100%; /* Ancho completo en pantallas pequeñas */
+    max-width: 900px; /* Ancho máximo del contenedor */
+    height: 600px; /* Ancho máximo del contenedor */
+}
+
+.form-group{
+    margin-top: 36px;
+}
+
+.custom-btn {
+    background-color: rgb(82, 80, 80);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.custom-btn:hover {
+    background-color: gray; /* Color de fondo al hacer hover */
+    transition: background-color 0.3s; /* Suaviza la transición del hover */
+}
+
+@media (max-width: 768px) {
+    .divider {
+        display: none; /* Oculta la línea divisoria */
+    }
+
+    .col-md-6.d-none.d-md-block {
+        display: none; /* Oculta el segundo contenedor (la imagen) */
+    }
+}

@@ -1,2 +1,2 @@
-# SIOT2
+# SIOT
 Sistema de Ocupación Hotelera
