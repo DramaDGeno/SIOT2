@@ -38,3 +38,17 @@ SELECT fecha, tipo, habitacionesocupadas, habitacionestotales
 FROM tipohabitacion a
 INNER JOIN historico b
 ON a.idtipo = b.idtipo;
+
+
+CREATE TABLE usuarios (
+    idusuario INT PRIMARY KEY AUTO_INCREMENT,    -- ID único para cada usuario
+    nombre VARCHAR(50) NOT NULL,                 -- Nombre del usuario
+    usuario VARCHAR(20) NOT NULL UNIQUE,         -- Nombre de usuario (único)
+    contrasena VARCHAR(20) NOT NULL,           
+    rol BOOLEAN NOT NULL                         -- Rol (TRUE para administrador, FALSE para usuario normal)
+);
+
+
+INSERT INTO usuarios (nombre, usuario, contrasena, rol)
+VALUES ('admin', 'admin', 'admin123', 1),
+('Kazumi Acosta', 'kazumi', 'kazumi01', 0);
