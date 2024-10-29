@@ -149,6 +149,62 @@ app.get('/api/historial', (req, res) => {
 });
 
 
+// Configurar sesiones
+const session = require('express-session');
+
+app.use(session({
+    secret: 'thisisasecret', // Cambia esto por una clave secreta segura
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // Cambia a true si usas HTTPS
+}));
+
+//login
+app.post('/login', (req, res) => {
+    const { usuario, contrasena } = req.body;
+
+    const query = 'SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?';
+
+    db.query(query, [usuario, contrasena], (err, results) => {
+        if (err) return res.status(500).json({ message: 'Error al consultar la base de datos' });
+        
+        if (results.length > 0) {
+            // Autenticación exitosa: guardar el usuario en la sesión
+            req.session.user = {
+                id: results[0].idusuario,
+                nombre: results[0].nombre,
+                rol: results[0].rol
+            };
+            res.status(200).json({ message: 'Inicio de sesión exitoso', rol: results[0].rol });
+        } else {
+            // Autenticación fallida
+            res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+        }
+    });
+});
+
+
+//verify session
+app.get('/check-session', (req, res) => {
+    if (req.session.user) {
+        res.status(200).json({ loggedIn: true, user: req.session.user });
+    } else {
+        res.status(401).json({ loggedIn: false });
+    }
+});
+
+
+//logout
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error al cerrar la sesión' });
+        }
+        res.clearCookie('connect.sid'); // Limpiar cookie de sesión
+        res.status(200).json({ message: 'Sesión cerrada con éxito' });
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
