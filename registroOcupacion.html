@@ -20,44 +20,35 @@
   </head>
 
   <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">
-        <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
-      </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <button class="btn btn-dark">
-              Registrar habitaciones reservadas
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-dark">Visualizar gráficas</button>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-dark">Histórico</button>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-dark">Gestión de usuarios</button>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-dark">Cerrar sesión</button>
-          </li>
-        </ul>
-      </div>
-    </nav>
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='historial.html'">Histórico</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark">Cerrar sesión</button>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
     <!-- Título y línea de separación -->
     <div class="header">
@@ -67,7 +58,7 @@
 
     <!-- Formulario -->
     <div class="form-container">
-      <form>
+      <form id="form-historico">
         <div class="form-group">
           <label for="fecha">Fecha:</label>
           <input type="date" id="fecha" name="fecha" required />
@@ -264,7 +255,6 @@
               document.getElementById("room-name").value = "";
               document.getElementById("room-quantity").value = "";
               fetchHabitaciones();
-           
 
               // Actualizar dinámicamente la lista de habitaciones sin recargar la página
               actualizarHabitaciones();
@@ -500,6 +490,40 @@
 
       // Cargar los tipos de habitación al iniciar la página
       fetchHabitaciones();
+    </script>
+
+    <script>
+      document
+        .getElementById("form-historico")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Obtener la fecha del formulario
+          const fecha = document.getElementById("fecha").value;
+
+          // Crear un objeto con las cantidades de habitaciones ocupadas
+          const habitaciones = {};
+          document
+            .querySelectorAll("#habitaciones-dinamicas input")
+            .forEach((input) => {
+              habitaciones[input.name] = input.value;
+            });
+
+          // Enviar los datos al servidor
+          axios
+            .post("http://localhost:3000/guardar-historico", {
+              fecha,
+              habitaciones,
+            })
+            .then((response) => {
+              console.log("Registros guardados:", response.data);
+              // Aquí puedes mostrar un mensaje de éxito
+            })
+            .catch((error) => {
+              console.error("Error al guardar los registros:", error);
+              // Aquí puedes mostrar un mensaje de error
+            });
+        });
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
