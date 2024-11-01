@@ -56,6 +56,62 @@ app.post('/login', (req, res) => {
     });
 });
 
+// Ruta para obtener todos los usuarios
+app.get('/api/usuarios', (req, res) => {
+  const query = 'SELECT idusuario, nombre, usuario, rol FROM usuarios';
+
+  db.query(query, (error, results) => {
+      if (error) {
+          console.error('Error al obtener los usuarios:', error);
+          res.status(500).json({ message: 'Error al obtener los usuarios' });
+      } else {
+          res.json(results); // Enviar los usuarios como respuesta en formato JSON
+      }
+  });
+});
+
+// Ruta para crear un nuevo usuario
+app.post("/api/usuarios/crear", (req, res) => {
+  const { nombre, usuario, contrasena, rol } = req.body;
+  const rolBooleano = rol === 'admin'; // 'admin' se convierte en true, otros en false
+  
+  // Consulta para verificar si el nombre de usuario ya existe
+  const queryCheck = "SELECT usuario FROM usuarios WHERE LOWER(usuario) = LOWER(?)";
+  
+  // Consulta para insertar un nuevo usuario
+  const queryInsert = "INSERT INTO usuarios (nombre, usuario, contrasena, rol) VALUES (?, ?, ?, ?)";
+
+  // Validar que el nombre de usuario no esté vacío
+  if (!usuario || !nombre || !contrasena) {
+      return res.status(400).send({ message: "Todos los campos son obligatorios." });
+  }
+
+  // Verificar si el usuario ya existe
+  db.query(queryCheck, [usuario], (error, results) => {
+      if (error) {
+          console.error('Error al verificar el usuario:', error);
+          return res.status(500).json({ message: 'Error al verificar el usuario' });
+      }
+
+      if (results.length > 0) {
+          return res.status(400).send({ message: "El nombre de usuario ya existe." });
+      }
+
+      // Si el usuario no existe, proceder a la inserción
+      db.query(queryInsert, [nombre, usuario, contrasena, rolBooleano], (error, results) => {
+          if (error) {
+              console.error('Error al crear el usuario:', error);
+              return res.status(500).json({ message: 'Error al crear el usuario' });
+          } else {
+              res.status(201).json({ message: 'Usuario creado', idusuario: results.insertId });
+              
+          }
+      });
+  });
+});
+
+ 
+
 
 // Ruta para crear un nuevo tipo de habitación
 app.post("/tipohabitaciones", (req, res) => {
