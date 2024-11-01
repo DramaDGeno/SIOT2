@@ -25,6 +25,38 @@ db.connect((err) => {
   }
 });
 
+// Dependencias necesarias para manejar sesiones y cifrado de contraseñas
+const session = require('express-session');
+
+// Configuración de la sesión en express
+app.use(session({
+    secret: 'EebubkdJ0@toYquk@zH]',
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Ruta para el login
+app.post('/login', (req, res) => {
+    const { usuario, contrasena } = req.body;
+    const query = 'SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?';
+
+    db.query(query, [usuario, contrasena], (err, results) => {
+        if (err) {
+            return res.status(500).send({ message: 'Error al consultar la base de datos' });
+        }
+
+        if (results.length > 0) {
+            const { rol } = results[0];
+            req.session.rol = rol;  // Almacena el rol en la sesión
+
+            return res.status(200).send({ message: 'Inicio de sesión exitoso', rol });
+        } else {
+            return res.status(401).send({ message: 'Usuario o contraseña incorrectos' });
+        }
+    });
+});
+
+
 // Ruta para crear un nuevo tipo de habitación
 app.post("/tipohabitaciones", (req, res) => {
   const { tipo, cantidad } = req.body;
@@ -173,122 +205,99 @@ app.get("/api/historial", (req, res) => {
   });
 });
 
-// Ruta para guardar los registros históricos
-app.post("/guardar-historico", (req, res) => {
+app.post('/guardar-historico', (req, res) => {
   const { fecha, habitaciones } = req.body;
 
-  // Paso 1: Obtener el total de habitaciones disponibles en la tabla 'tipohabitacion'
-  const totalQuery =
-    "SELECT SUM(cantidad) AS totalHabitaciones FROM tipohabitacion";
-  db.query(totalQuery, (err, totalResult) => {
+  // Paso 1: Verificar si ya existen registros para la fecha
+  const checkQuery = 'SELECT COUNT(*) AS count FROM historico WHERE fecha = ?';
+  db.query(checkQuery, [fecha], (err, checkResult) => {
     if (err) {
-      return res
-        .status(500)
-        .send({ message: "Error al consultar las habitaciones totales" });
+      return res.status(500).send({ message: 'Error al verificar la fecha' });
     }
 
-    const habitacionestotales = totalResult[0].totalHabitaciones;
+    if (checkResult[0].count > 0) {
+      return res.status(400).send({ message: 'Ya existen registros para esta fecha' });
+    }
 
-    // Paso 2: Realizar inserciones por cada tipo de habitación que haya sido ingresado en el formulario
-    const promesas = Object.entries(habitaciones).map(([tipo, ocupadas]) => {
-      return new Promise((resolve, reject) => {
-        // Obtener el idtipo de la tabla 'tipohabitacion' según el nombre del tipo
-        const tipoQuery = "SELECT idtipo FROM tipohabitacion WHERE tipo = ?";
-        db.query(tipoQuery, [tipo], (err, tipoResult) => {
-          if (err || tipoResult.length === 0) {
-            return reject(err || new Error("Tipo de habitación no encontrado"));
-          }
+    // Paso 2: Obtener el total de habitaciones disponibles en la tabla 'tipohabitacion'
+    const totalQuery = 'SELECT tipo, cantidad FROM tipohabitacion';
+    db.query(totalQuery, (err, tiposHabitacion) => {
+      if (err) {
+        return res.status(500).send({ message: 'Error al consultar las habitaciones totales' });
+      }
 
-          const idtipo = tipoResult[0].idtipo;
+      const cantidadesDisponibles = {};
+      tiposHabitacion.forEach(tipo => {
+        cantidadesDisponibles[tipo.tipo.toLowerCase()] = tipo.cantidad;
+      });
 
-          // Insertar en la tabla 'historico'
-          const insertQuery = `
+      // Validar cantidades
+      for (const [tipo, ocupadas] of Object.entries(habitaciones)) {
+        const cantidadDisponible = cantidadesDisponibles[tipo.toLowerCase()];
+        if (cantidadDisponible === undefined) {
+          return res.status(400).send({ message: `Tipo de habitación '${tipo}' no encontrado` });
+        }
+        if (ocupadas > cantidadDisponible) {
+          return res.status(400).send({ message: `No se pueden registrar más de ${cantidadDisponible} habitaciones de tipo ${tipo}` });
+        }
+      }
+
+      // Paso 3: Obtener el total de habitaciones disponibles
+      const totalHabitaciones = Object.values(cantidadesDisponibles).reduce((a, b) => a + b, 0);
+
+      // Paso 4: Realizar inserciones por cada tipo de habitación ingresado en el formulario
+      const promesas = Object.entries(habitaciones).map(([tipo, ocupadas]) => {
+        return new Promise((resolve, reject) => {
+          const tipoQuery = 'SELECT idtipo FROM tipohabitacion WHERE tipo = ?';
+          db.query(tipoQuery, [tipo], (err, tipoResult) => {
+            if (err || tipoResult.length === 0) {
+              return reject(err || new Error('Tipo de habitación no encontrado'));
+            }
+
+            const idtipo = tipoResult[0].idtipo;
+
+            // Insertar en la tabla 'historico'
+            const insertQuery = `
               INSERT INTO historico (idtipo, fecha, habitacionesocupadas, habitacionestotales) 
               VALUES (?, ?, ?, ?)
             `;
-          db.query(
-            insertQuery,
-            [idtipo, fecha, ocupadas, habitacionestotales],
-            (err, result) => {
+            db.query(insertQuery, [idtipo, fecha, ocupadas, totalHabitaciones], (err, result) => {
               if (err) return reject(err);
-              resolve(result);
-            }
-          );
+              resolve(ocupadas);
+            });
+          });
         });
       });
+
+      // Ejecutar todas las promesas de inserción
+      Promise.all(promesas)
+        .then((ocupadasArray) => {
+          // Calcular el total de habitaciones ocupadas
+          const totalOcupadas = ocupadasArray.reduce((a, b) => a + Number(b), 0);
+          const porcentaje = (totalOcupadas / totalHabitaciones) * 100;
+
+          // Insertar el porcentaje en la tabla 'estadistica'
+          const insertEstadisticaQuery = `
+            INSERT INTO estadistica (fecha, porcentaje) 
+            VALUES (?, ?)
+          `;
+          db.query(insertEstadisticaQuery, [fecha, porcentaje], (err) => {
+            if (err) {
+              return res.status(500).send({ message: 'Error al insertar en la tabla estadistica' });
+            }
+
+            // Respuesta exitosa
+            res.status(201).send({ message: 'Registros históricos y estadística guardados exitosamente' });
+          });
+        })
+        .catch((err) => res.status(500).send({ message: err.message }));
     });
-
-    // Ejecutar todas las promesas de inserción
-    Promise.all(promesas)
-      .then(() =>
-        res
-          .status(201)
-          .send({ message: "Registros históricos guardados exitosamente" })
-      )
-      .catch((err) => res.status(500).send({ message: err.message }));
   });
 });
 
-// Configurar sesiones
-const session = require("express-session");
 
-app.use(
-  session({
-    secret: "thisisasecret", // Cambia esto por una clave secreta segura
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false }, // Cambia a true si usas HTTPS
-  })
-);
 
-//login
-app.post("/login", (req, res) => {
-  const { usuario, contrasena } = req.body;
 
-  const query = "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?";
-
-  db.query(query, [usuario, contrasena], (err, results) => {
-    if (err)
-      return res
-        .status(500)
-        .json({ message: "Error al consultar la base de datos" });
-
-    if (results.length > 0) {
-      // Autenticación exitosa: guardar el usuario en la sesión
-      req.session.user = {
-        id: results[0].idusuario,
-        nombre: results[0].nombre,
-        rol: results[0].rol,
-      };
-      res
-        .status(200)
-        .json({ message: "Inicio de sesión exitoso", rol: results[0].rol });
-    } else {
-      // Autenticación fallida
-      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
-    }
-  });
-});
-
-//verify session
-app.get("/check-session", (req, res) => {
-  if (req.session.user) {
-    res.status(200).json({ loggedIn: true, user: req.session.user });
-  } else {
-    res.status(401).json({ loggedIn: false });
-  }
-});
-
-//logout
-app.post("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: "Error al cerrar la sesión" });
-    }
-    res.clearCookie("connect.sid"); // Limpiar cookie de sesión
-    res.status(200).json({ message: "Sesión cerrada con éxito" });
-  });
-});
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);

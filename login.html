@@ -43,27 +43,75 @@
         </div>
     </section>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-    document.querySelector('form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const usuario = document.getElementById('usuario').value;
-        const contrasena = document.getElementById('contrasena').value;
+        document.querySelector("form").addEventListener("submit", function (event) {
+            event.preventDefault();
     
-        axios.post('http://localhost:3000/login', { usuario, contrasena })
-            .then(response => {
-                if (response.data.rol) {
-                    window.location.href = '/registroOcupacion.html'; // Redirige al usuario a su página según su rol
-                }
-            })
-            .catch(error => {
-                alert('Usuario o contraseña incorrectos');
-            });
-    });
+            const usuario = document.getElementById("usuario").value;
+            const contrasena = document.getElementById("contrasena").value;
+    
+            axios.post('http://localhost:3000/login', { usuario, contrasena })
+                .then(response => {
+                    const rol = response.data.rol;
+                    sessionStorage.setItem('rol', rol); // Almacena el rol en sessionStorage
+                    Swal.fire({
+                        title: 'Inicio de sesión exitoso',
+                        text: 'Bienvenido al sistema.',
+                        icon: 'success',
+                        timer: 2000, // Duración de 2 segundos
+                        showConfirmButton: false // Oculta el botón de confirmación
+                    }).then(() => {
+                        // Redirige a la página principal o a la página de registro después de que se cierre la alerta
+                        window.location.href = "historial.html";
+                    });
+                })
+                .catch(error => {
+                    Swal.fire("Error", error.response.data.message, "error");
+                });
+        });
     </script>
+      <script>
+        // Obtener el rol desde sessionStorage
+        const rol = sessionStorage.getItem('rol');
     
+        // Seleccionar el contenedor del navbar
+        const navbarItems = document.getElementById('navbarItems');
+    
+        if (rol === '1') {
+            // Si el rol es 1 (administrador), mostrar todos los elementos
+            navbarItems.innerHTML = `
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='historial.html'">Histórico</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                </li>
+            `;
+        } else if (rol === '0') {
+            // Si el rol es 0 (usuario normal), mostrar solo 'Registrar habitación' y 'Cerrar sesión'
+            navbarItems.innerHTML = `
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                </li>
+            `;
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

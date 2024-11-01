@@ -44,8 +44,9 @@
           <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
         </li>
         <li class="nav-item">
-          <button class="btn btn-dark">Cerrar sesión</button>
-        </li>
+          <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+      </li>
+      
       </ul>
     </div>
   </nav>
@@ -492,39 +493,58 @@
       fetchHabitaciones();
     </script>
 
-    <script>
-      document
-        .getElementById("form-historico")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Establecer la fecha actual al abrir la página
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("fecha").value = today;
 
-          // Obtener la fecha del formulario
-          const fecha = document.getElementById("fecha").value;
+    document.getElementById("form-historico").addEventListener("submit", function (event) {
+      event.preventDefault();
 
-          // Crear un objeto con las cantidades de habitaciones ocupadas
-          const habitaciones = {};
-          document
-            .querySelectorAll("#habitaciones-dinamicas input")
-            .forEach((input) => {
-              habitaciones[input.name] = input.value;
-            });
+      // Obtener la fecha del formulario
+      const fecha = document.getElementById("fecha").value;
 
-          // Enviar los datos al servidor
-          axios
-            .post("http://localhost:3000/guardar-historico", {
-              fecha,
-              habitaciones,
-            })
-            .then((response) => {
-              console.log("Registros guardados:", response.data);
-              // Aquí puedes mostrar un mensaje de éxito
-            })
-            .catch((error) => {
-              console.error("Error al guardar los registros:", error);
-              // Aquí puedes mostrar un mensaje de error
-            });
+      // Crear un objeto con las cantidades de habitaciones ocupadas
+      const habitaciones = {};
+      document.querySelectorAll("#habitaciones-dinamicas input").forEach((input) => {
+        habitaciones[input.name.toLowerCase()] = input.value; // Asegúrate de que el nombre esté en minúsculas
+      });
+
+      // Enviar los datos al servidor
+      axios
+        .post("http://localhost:3000/guardar-historico", {
+          fecha,
+          habitaciones,
+        })
+        .then((response) => {
+          console.log("Registros guardados:", response.data);
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: 'Registros guardados exitosamente',
+          });
+
+          // Limpiar los inputs de habitaciones (menos la fecha)
+          document.querySelectorAll("#habitaciones-dinamicas input").forEach((input) => {
+            input.value = ''; // Limpiar cada input
+          });
+        })
+        .catch((error) => {
+          console.error("Error al guardar los registros:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.response?.data.message || 'Hubo un error al guardar los registros',
+          });
         });
-    </script>
+    });
+  });
+</script>
+
+
+
+
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

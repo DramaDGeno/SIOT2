@@ -22,11 +22,10 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ml-auto">
+      <ul class="navbar-nav ml-auto" id="navbarItems">
         <li class="nav-item">
-          <button class="btn btn-dark">
-            Registrar habitaciones reservadas
-          </button>
+          <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitaciones
+            reservadas </button>
         </li>
         <li class="nav-item">
           <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
@@ -38,8 +37,8 @@
           <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
         </li>
         <li class="nav-item">
-          <button class="btn btn-dark">Cerrar sesión</button>
-        </li>
+          <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+      </li>
       </ul>
     </div>
   </nav>
@@ -53,61 +52,115 @@
 
   <table id="historial-table" class="table">
     <thead>
-        <tr>
-            <th data-field="fecha" data-sortable="true">Fecha</th>
-            <th data-field="tipo">Tipo de Habitación</th>
-            <th data-field="habitacionesocupadas" data-sortable="true">Habitaciones Ocupadas</th>
-            <th data-field="habitacionestotales" data-sortable="true">Habitaciones Totales</th>
-        </tr>
+      <tr>
+        <th data-field="fecha" data-sortable="true">Fecha</th>
+        <th data-field="tipo">Tipo de Habitación</th>
+        <th data-field="habitacionesocupadas" data-sortable="true">Habitaciones Ocupadas</th>
+        <th data-field="habitacionestotales" data-sortable="true">Habitaciones Totales</th>
+      </tr>
     </thead>
     <tbody>
-        <!-- Las filas se llenarán dinámicamente aquí -->
+      <!-- Las filas se llenarán dinámicamente aquí -->
     </tbody>
-</table>
+  </table>
 
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script>
-    $(document).ready(function() {
-    // Usamos fetch para obtener los datos de la API
-    fetch('http://127.0.0.1:3000/api/historial')
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      // Usamos fetch para obtener los datos de la API
+      fetch('http://127.0.0.1:3000/api/historial')
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al obtener el historial');
-            }
-            return response.json();
+          if (!response.ok) {
+            throw new Error('Error al obtener el historial');
+          }
+          return response.json();
         })
         .then(data => {
-            // Llenar la tabla con los datos
-            const tableBody = $('#historial-table tbody');
-            tableBody.empty(); // Limpiar la tabla antes de llenarla
+          // Llenar la tabla con los datos
+          const tableBody = $('#historial-table tbody');
+          tableBody.empty(); // Limpiar la tabla antes de llenarla
 
-            data.forEach(item => {
-                const fechaFormateada = new Date(item.fecha).toLocaleDateString(); // Formato legible
-                const row = `<tr>
+          data.forEach(item => {
+            const fechaFormateada = new Date(item.fecha).toLocaleDateString(); // Formato legible
+            const row = `<tr>
                     <td>${fechaFormateada}</td>
                     <td>${item.tipo}</td>
                     <td>${item.habitacionesocupadas}</td>
                     <td>${item.habitacionestotales}</td>
                 </tr>`;
-                tableBody.append(row);
-            });
+            tableBody.append(row);
+          });
 
-            // Inicializar bootstrap-table después de llenar los datos
-            $('#historial-table').bootstrapTable('load', data); // Cargar los datos manualmente
+          // Inicializar bootstrap-table después de llenar los datos
+          $('#historial-table').bootstrapTable('load', data); // Cargar los datos manualmente
         })
         .catch(error => {
-            console.error(error);
+          console.error(error);
         });
-});
+    });
 
-</script>
+  </script>
+
 
 
   
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="/auth.js"></script> <!-- Asegúrate de ajustar la ruta -->
+ 
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener el rol desde sessionStorage
+        const rol = sessionStorage.getItem('rol');
+
+        // Seleccionar el contenedor del navbar
+        const navbarItems = document.getElementById('navbarItems');
+
+        if (rol === '1') {
+            // Si el rol es 1 (administrador), mostrar todos los elementos
+            navbarItems.innerHTML = `
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='historial.html'">Histórico</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                </li>
+            `;
+        } else if (rol === '0') {
+            // Si el rol es 0 (usuario normal), mostrar solo 'Registrar habitación' y 'Cerrar sesión'
+            navbarItems.innerHTML = `
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                </li>
+            `;
+        }
+
+        // Asignar el evento de click al botón de cerrar sesión
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                sessionStorage.removeItem('rol'); // Eliminar el rol de la sesión
+                window.location.href = "login.html"; // Redirigir al login
+            });
+        }
+    });
+</script>
+
 </body>
 
 </html>
