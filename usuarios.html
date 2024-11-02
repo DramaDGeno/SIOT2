@@ -41,7 +41,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ml-auto" id="navbarItems">
           <li class="nav-item">
             <button
               class="btn btn-dark"
@@ -77,7 +77,7 @@
           <li class="nav-item">
             <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
           </li>
-        </ul>
+        </>
       </div>
     </nav>
 
@@ -281,8 +281,8 @@
     <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script src="/auth.js"></script>
+    
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Obtener el rol desde sessionStorage

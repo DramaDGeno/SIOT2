@@ -21,7 +21,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto" id="navbarItems">
                 <li class="nav-item">
                     <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'"> Registrar
                         habitaciones reservadas</button>
@@ -59,6 +59,58 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/auth.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener el rol desde sessionStorage
+            const rol = sessionStorage.getItem('rol');
+    
+            // Seleccionar el contenedor del navbar
+            const navbarItems = document.getElementById('navbarItems');
+    
+            if (rol === '1') {
+                // Si el rol es 1 (administrador), mostrar todos los elementos
+                navbarItems.innerHTML = `
+                    <li class="nav-item">
+                        <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-dark" onclick="location.href='historial.html'">Histórico</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                    </li>
+                `;
+            } else if (rol === '0') {
+                // Si el rol es 0 (usuario normal), mostrar solo 'Registrar habitación' y 'Cerrar sesión'
+                navbarItems.innerHTML = `
+                    <li class="nav-item">
+                        <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                    </li>
+                `;
+            }
+    
+            // Asignar el evento de click al botón de cerrar sesión
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    sessionStorage.removeItem('rol'); // Eliminar el rol de la sesión
+                    window.location.href = "login.html"; // Redirigir al login
+                });
+            }
+        });
+    </script>
+
 </body>
 
 </html>
