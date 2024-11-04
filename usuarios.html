@@ -226,11 +226,11 @@
                     <td>${usuario.nombre}</td>
                     <td>${usuario.usuario}</td>
                     <td>${rolNombre}</td>
-                    <td> <button class="btn btn-warning btn-sm edit-btn" data-id="${usuario.idusuario}">
+                    <td> <button class="btn btn-sm edit-btn" data-id="${usuario.idusuario}">
                     <i class="fas fa-pencil-alt"></i>
                     </button></td>
-                    <td> <button class="btn btn-danger btn-sm delete-btn" data-id="${usuario.idusuario}">
-                    <i class="fas fa-trash"></i> 
+                    <td> <button class="btn btn-sm delete-btn" data-id="${usuario.idusuario}">
+                    <i class="fas fa-trash"></i>
                     </button></td>
                 </tr>`;
           tableBody.innerHTML += row; // Agregar la fila directamente
@@ -320,12 +320,10 @@
                         <td>${usuario.usuario}</td>
                         <td>${rolNombre}</td>
                         <td> <button class="btn btn-sm edit-btn" data-id="${usuario.idusuario}">
-                          <i class="fas fa-pencil-alt"></i> 
-                         </button>
-                        </td>
-                        <td> 
-                       <button class="btn btn-sm delete-btn" data-id="${usuario.idusuario}">
-                         <i class="fas fa-trash"></i> 
+                    <i class="fas fa-pencil-alt"></i>
+                    </button></td>
+                    <td> <button class="btn btn-sm delete-btn" data-id="${usuario.idusuario}">
+                    <i class="fas fa-trash"></i>
                         </button>
                         </td>
                         </button></td>
@@ -484,7 +482,7 @@
                       <td>${usuario.nombre}</td>
                       <td>${usuario.usuario}</td>
                       <td>
-                          <button class="btn btn-success btn-sm recover-btn" data-id="${usuario.idusuario}">
+                          <button class="btn btn-dark btn-sm recover-btn" data-id="${usuario.idusuario}">
                               Recuperar
                           </button>
                       </td>`;
@@ -517,6 +515,7 @@
 
             // Recargar la tabla de usuarios inactivos
             cargarUsuariosInactivos();
+            cargarUsuarios();
           } catch (error) {
             console.error("Error al recuperar el usuario:", error);
             Swal.fire({
