@@ -94,3 +94,42 @@ body, html {
         display: none; /* Oculta el segundo contenedor (la imagen) */
     }
 }
+
+/* Estilo normal del icono de editar (en negro) */
+.edit-btn i {
+    color: black;
+    transition: color 0.3s; /* Suavizar la transición del color */
+}
+
+/* Estilo normal del icono de eliminar (en blanco) */
+.delete-btn i {
+    color: black;
+    transition: color 0.3s; /* Suavizar la transición del color */
+}
+
+/* Cambiar el color a rojo en el hover */
+.edit-btn:hover i,
+.delete-btn:hover i {
+    color: #969494;
+}
+
+.btn-primary {
+    background-color: rgb(29, 28, 28); /* Color de fondo negro */
+    border-color: rgb(82, 80, 80); /* Borde negro */
+    color: white; /* Texto en blanco */
+    transition: background-color 0.3s, border-color 0.3s; /* Suavizar la transición */
+}
+
+.btn-primary:hover {
+    background-color:  #969494; /* Color de fondo gris en hover */
+    border-color:  #969494; /* Borde gris en hover */
+    color: white; /* Mantener el texto en blanco */
+}
+
+.container {
+    margin-top: 20px; /* Espacio adicional para el contenedor */
+}
+
+.btn {
+    margin-left: 0; /* Asegúrate de que no haya margen izquierdo */
+}

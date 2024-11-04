@@ -1,252 +1,311 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
-    />
-    <link rel="stylesheet" href="/css/styleUsuarios.css" />
-    <title>Usuarios</title>
-  </head>
 
-  <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">
-        <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
-      </a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto" id="navbarItems">
-          <li class="nav-item">
-            <button
-              class="btn btn-dark"
-              onclick="location.href='registroOcupacion.html'"
-            >
-              Registrar habitaciones reservadas
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="btn btn-dark"
-              onclick="location.href='graficas.html'"
-            >
-              Visualizar gráficas
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="btn btn-dark"
-              onclick="location.href='historial.html'"
-            >
-              Histórico
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="btn btn-dark"
-              onclick="location.href='usuarios.html'"
-            >
-              Gestión de usuarios
-            </button>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
-          </li>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <link rel="stylesheet" href="/css/styleUsuarios.css" />
+  <title>Usuarios</title>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto" id="navbarItems">
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">
+            Registrar habitaciones reservadas
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='graficas.html'">
+            Visualizar gráficas
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='historial.html'">
+            Histórico
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='usuarios.html'">
+            Gestión de usuarios
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+        </li>
         </>
-      </div>
-    </nav>
-
-    <div class="header">
-      <h1>Usuarios</h1>
-      <div class="separator"></div>
     </div>
+  </nav>
 
-    <div class="container">
-      <table id="usuarios-table" class="table">
-        <thead>
-          <tr>
-            <th data-field="nombre" data-sortable="true">Nombre</th>
-            <th data-field="usuario">Usuario</th>
-            <th data-field="rol" data-sortable="true">Rol</th>
-            <th>Crear</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Las filas se llenarán dinámicamente aquí -->
-        </tbody>
-      </table>
-    </div>
+  <div class="header">
+    <h1>Usuarios</h1>
+    <div class="separator"></div>
+  </div>
 
-    <div class="text-center">
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-toggle="modal"
-        data-target="#newUserModal"
-      >
-        Crear Nuevo Usuario
-      </button>
-    </div>
+  <div class="container">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newUserModal">
+      Crear Nuevo Usuario
+    </button>
+    <span class="ml-2" style="cursor: pointer;" data-toggle="modal" data-target="#cargarUsuariosInactivos">
+      Recuperar usuarios
+    </span>
+  </div>
 
-    <!-- Modal -->
-    <div
-      class="modal fade"
-      id="newUserModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="newUserModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="newUserModalLabel">
-              Crear Nuevo Usuario
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
+  <div class="container">
+    <table id="usuarios-table" class="table">
+      <thead>
+        <tr>
+          <th data-field="nombre" data-sortable="true">Nombre</th>
+          <th data-field="usuario">Usuario</th>
+          <th data-field="rol" data-sortable="true">Rol</th>
+          <th>Modificar</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Las filas se llenarán dinámicamente aquí -->
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <!-- Modal crear usuario -->
+  <div class="modal fade" id="newUserModal" tabindex="-1" role="dialog" aria-labelledby="newUserModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newUserModalLabel">
+            Crear Nuevo Usuario
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="user-form">
+            <div class="form-group">
+              <label for="full-name">Nombre Completo:</label>
+              <input type="text" class="form-control" id="full-name" placeholder="Ingresa el nombre completo"
+                required />
+            </div>
+            <div class="form-group">
+              <label for="username">Usuario:</label>
+              <input type="text" class="form-control" id="username" placeholder="Ingresa un nombre de usuario"
+                required />
+            </div>
+            <div class="form-group">
+              <label for="password">Contraseña:</label>
+              <input type="password" class="form-control" id="password" placeholder="Ingresa una contraseña" required />
+            </div>
+            <div class="form-group">
+              <label for="role">Rol:</label>
+              <select class="form-control" id="role" required>
+                <option value="" disabled selected>Selecciona un rol</option>
+                <option value="admin">Administrador</option>
+                <option value="user">Usuario</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Crear Usuario
             </button>
-          </div>
-          <div class="modal-body">
-            <form id="user-form">
-              <div class="form-group">
-                <label for="full-name">Nombre Completo:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="full-name"
-                  placeholder="Ingresa el nombre completo"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="username">Usuario:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="username"
-                  placeholder="Ingresa un nombre de usuario"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  placeholder="Ingresa una contraseña"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="role">Rol:</label>
-                <select class="form-control" id="role" required>
-                  <option value="" disabled selected>Selecciona un rol</option>
-                  <option value="admin">Administrador</option>
-                  <option value="user">Usuario</option>
-                </select>
-              </div>
-              <button type="submit" class="btn btn-primary">
-                Crear Usuario
-              </button>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- crear nuevo usuario -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-      document
-        .getElementById("user-form")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault(); // Evitar el envío por defecto del formulario
+  <!-- Modal Editar Usuario -->
+  <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUserModalLabel">Editar Usuario</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editUserForm">
+            <input type="hidden" id="edit-user-id" /> <!-- ID oculto para identificar el usuario -->
+            <div class="form-group">
+              <label for="edit-full-name">Nombre Completo:</label>
+              <input type="text" class="form-control" id="edit-full-name" placeholder="Ingresa el nombre completo"
+                required />
+            </div>
+            <div class="form-group">
+              <label for="edit-username">Usuario:</label>
+              <input type="text" class="form-control" id="edit-username" placeholder="Ingresa un nombre de usuario"
+                required />
+            </div>
+            <div class="form-group">
+              <label for="edit-password">Contraseña:</label>
+              <input type="password" class="form-control" id="edit-password"
+                placeholder="Ingresa una nueva contraseña" />
+            </div>
+            <div class="form-group">
+              <label for="edit-role">Rol:</label>
+              <select class="form-control" id="edit-role" required>
+                <option value="admin">Administrador</option>
+                <option value="user">Usuario</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-          // Obtener los valores de los campos
-          const nombre = document.getElementById("full-name").value;
-          const usuario = document.getElementById("username").value;
-          const contrasena = document.getElementById("password").value;
-          const rol = document.getElementById("role").value;
 
-          // Enviar los datos al servidor
-          try {
-            const response = await axios.post(
-              "http://localhost:3000/api/usuarios/crear",
-              {
-                nombre,
-                usuario,
-                contrasena,
-                rol,
-              }
-            );
-            // Mostrar mensaje de éxito con SweetAlert
-            Swal.fire({
-              title: "Éxito!",
-              text: response.data.message,
-              icon: "success",
-              confirmButtonText: "Aceptar",
-            });
+  <!-- Modal para Usuarios Inactivos -->
+  <div class="modal fade" id="cargarUsuariosInactivos" tabindex="-1" role="dialog"
+    aria-labelledby="cargarUsuariosInactivos" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="recoverUsersModalLabel">Usuarios Inactivos</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table id="inactive-users-table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="inactive-users-table-body">
+                <!-- Aquí se llenarán los usuarios inactivos -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            // Cerrar el modal y limpiar el formulario
-            $("#newUserModal").modal("hide");
-            document.getElementById("user-form").reset();
-          } catch (error) {
-            // Mostrar mensaje de error con SweetAlert
-            let errorMessage = "Error al crear el usuario.";
-            if (
-              error.response &&
-              error.response.data &&
-              error.response.data.message
-            ) {
-              errorMessage = error.response.data.message; // Mensaje de error del servidor
-            }
-            Swal.fire({
-              title: "Error!",
-              text: errorMessage,
-              icon: "error",
-              confirmButtonText: "Aceptar",
-            });
-          }
+
+  <!-- crear nuevo usuario -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Función para cargar y mostrar usuarios
+    const cargarUsuarios = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/usuarios");
+        const usuarios = response.data;
+        const tableBody = document.querySelector("#usuarios-table tbody");
+        tableBody.innerHTML = ""; // Limpiar la tabla antes de llenarla
+
+        usuarios.forEach((usuario) => {
+          const rolNombre = usuario.rol === 1 ? "Administrador" : "Usuario";
+          const row = `<tr>
+                    <td>${usuario.nombre}</td>
+                    <td>${usuario.usuario}</td>
+                    <td>${rolNombre}</td>
+                    <td> <button class="btn btn-warning btn-sm edit-btn" data-id="${usuario.idusuario}">
+                    <i class="fas fa-pencil-alt"></i>
+                    </button></td>
+                    <td> <button class="btn btn-danger btn-sm delete-btn" data-id="${usuario.idusuario}">
+                    <i class="fas fa-trash"></i> 
+                    </button></td>
+                </tr>`;
+          tableBody.innerHTML += row; // Agregar la fila directamente
         });
-    </script>
+      } catch (error) {
+        console.error("Error al cargar los usuarios:", error);
+      }
+    };
 
-    <!-- traer usuarios dbb -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
+ 
+
+    document
+      .getElementById("user-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault(); // Evitar el envío por defecto del formulario
+
+        // Obtener los valores de los campos
+        const nombre = document.getElementById("full-name").value;
+        const usuario = document.getElementById("username").value;
+        const contrasena = document.getElementById("password").value;
+        const rol = document.getElementById("role").value;
+
+        // Enviar los datos al servidor
+        try {
+          const response = await axios.post(
+            "http://localhost:3000/api/usuarios/crear",
+            {
+              nombre,
+              usuario,
+              contrasena,
+              rol,
+            }
+          );
+          // Mostrar mensaje de éxito con SweetAlert
+          Swal.fire({
+            title: "Éxito!",
+            text: response.data.message,
+            icon: "success",
+            confirmButtonText: "Aceptar",
+          });
+
+          // Cerrar el modal y limpiar el formulario
+          $("#newUserModal").modal("hide");
+          document.getElementById("user-form").reset();
+
+          cargarUsuarios(); // Llama a la función para cargar usuarios
+
+        } catch (error) {
+          // Mostrar mensaje de error con SweetAlert
+          let errorMessage = "Error al crear el usuario.";
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          ) {
+            errorMessage = error.response.data.message; // Mensaje de error del servidor
+          }
+          Swal.fire({
+            title: "Error!",
+            text: errorMessage,
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          });
+        }
+      });
+
+    // Cargar usuarios al inicio
+    document.addEventListener("DOMContentLoaded", cargarUsuarios);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Función para cargar y mostrar los usuarios
+      const cargarUsuarios = () => {
         axios
           .get("http://localhost:3000/api/usuarios")
           .then((response) => {
@@ -260,11 +319,15 @@
                         <td>${usuario.nombre}</td>
                         <td>${usuario.usuario}</td>
                         <td>${rolNombre}</td>
-                        <td> <button class="btn btn-warning btn-sm edit-btn" data-id="${usuario.idusuario}">
-                        <i class="fas fa-pencil-alt"></i> <!-- Icono de lápiz -->
-                        </button></td>
-                        <td> <button class="btn btn-danger btn-sm delete-btn" data-id="${usuario.idusuario}">
-                        <i class="fas fa-trash"></i> <!-- Icono de bote de basura -->
+                        <td> <button class="btn btn-sm edit-btn" data-id="${usuario.idusuario}">
+                          <i class="fas fa-pencil-alt"></i> 
+                         </button>
+                        </td>
+                        <td> 
+                       <button class="btn btn-sm delete-btn" data-id="${usuario.idusuario}">
+                         <i class="fas fa-trash"></i> 
+                        </button>
+                        </td>
                         </button></td>
                     </tr>`;
               tableBody.innerHTML += row; // Agregar la fila directamente
@@ -273,27 +336,220 @@
           .catch((error) => {
             console.error("Error al cargar los usuarios:", error);
           });
+      };
+
+      // Cargar los usuarios al inicio
+      cargarUsuarios();
+
+      // Lógica para el botón de edición
+      document.querySelector("#usuarios-table").addEventListener("click", async function (e) {
+        if (e.target.closest(".edit-btn")) {
+          const idusuario = e.target.closest(".edit-btn").dataset.id;
+
+          try {
+            const response = await axios.get(`http://localhost:3000/api/usuarios/${idusuario}`);
+            const usuario = response.data;
+
+            // Cargar datos en el formulario de edición
+            document.getElementById("edit-user-id").value = usuario.idusuario;
+            document.getElementById("edit-full-name").value = usuario.nombre;
+            document.getElementById("edit-username").value = usuario.usuario;
+            document.getElementById("edit-password").value = ""; // Opcional, dejar en blanco
+            document.getElementById("edit-role").value = usuario.rol === 1 ? "admin" : "user";
+
+            // Abrir el modal de edición
+            $("#editUserModal").modal("show");
+          } catch (error) {
+            console.error("Error al obtener el usuario:", error);
+            Swal.fire({
+              title: "Error",
+              text: "No se pudo cargar la información del usuario.",
+              icon: "error",
+              confirmButtonText: "Aceptar",
+            });
+          }
+        }
       });
-    </script>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/auth.js"></script>
-    
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Obtener el rol desde sessionStorage
-        const rol = sessionStorage.getItem("rol");
+      // Lógica para el botón de guardar cambios en el modal de edición
+      document.getElementById("editUserForm").addEventListener("submit", async function (e) {
+        e.preventDefault(); // Evitar el envío normal del formulario
 
-        // Seleccionar el contenedor del navbar
-        const navbarItems = document.getElementById("navbarItems");
+        const idusuario = document.getElementById("edit-user-id").value;
+        const nombre = document.getElementById("edit-full-name").value;
+        const usuario = document.getElementById("edit-username").value;
+        const contrasena = document.getElementById("edit-password").value; // Opcional
+        const rol = document.getElementById("edit-role").value === "admin" ? 1 : 0;
 
-        if (rol === "1") {
-          // Si el rol es 1 (administrador), mostrar todos los elementos
-          navbarItems.innerHTML = `
+        try {
+          const response = await axios.put(`http://localhost:3000/api/usuarios/${idusuario}`, {
+            nombre,
+            usuario,
+            contrasena: contrasena ? contrasena : undefined, // Enviar contrasena solo si se cambia
+            rol
+          });
+
+          Swal.fire({
+            title: "Éxito",
+            text: response.data.message,
+            icon: "success",
+            confirmButtonText: "Aceptar",
+          });
+
+          // Cerrar el modal
+          $("#editUserModal").modal("hide");
+
+          // Actualizar la tabla de usuarios
+          cargarUsuarios(); // Volver a cargar usuarios
+
+        } catch (error) {
+          console.error("Error al actualizar el usuario:", error);
+          Swal.fire({
+            title: "Error",
+            text: error.response?.data?.message || "No se pudo actualizar el usuario.",
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          });
+        }
+      });
+
+      //softdelete
+      document.querySelector("#usuarios-table").addEventListener("click", async function (e) {
+        // Verificar si se ha hecho clic en un botón de eliminación
+        if (e.target.closest(".delete-btn")) {
+          const idusuario = e.target.closest(".delete-btn").dataset.id;
+
+          // Confirmación con SweetAlert
+          const result = await Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción marcará al usuario como inactivo.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+          });
+
+          if (result.isConfirmed) {
+            try {
+              // Enviar solicitud DELETE para hacer soft delete
+              const response = await axios.delete(`http://localhost:3000/api/usuarios/${idusuario}`);
+
+              // Mostrar mensaje de éxito
+              Swal.fire({
+                title: "Eliminado",
+                text: response.data.message,
+                icon: "success",
+                confirmButtonText: "Aceptar",
+              });
+
+              // Actualizar la tabla de usuarios
+              cargarUsuarios(); // Llama a la función para recargar la tabla
+
+            } catch (error) {
+              console.error("Error al eliminar el usuario:", error);
+              Swal.fire({
+                title: "Error",
+                text: error.response?.data?.message || "No se pudo eliminar el usuario.",
+                icon: "error",
+                confirmButtonText: "Aceptar",
+              });
+            }
+          }
+        }
+      });
+
+    });
+  </script>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      const cargarUsuariosInactivos = async () => {
+        try {
+          const response = await axios.get("http://localhost:3000/api/usuarios/inactivos");
+          const usuariosInactivos = response.data;
+          const tableBody = document.querySelector("#inactive-users-table-body");
+          tableBody.innerHTML = ""; // Limpiar la tabla antes de llenarla
+
+          if (usuariosInactivos.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='3' class='text-center'>No hay usuarios inactivos</td></tr>";
+            return;
+          }
+
+          usuariosInactivos.forEach((usuario) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                      <td>${usuario.nombre}</td>
+                      <td>${usuario.usuario}</td>
+                      <td>
+                          <button class="btn btn-success btn-sm recover-btn" data-id="${usuario.idusuario}">
+                              Recuperar
+                          </button>
+                      </td>`;
+            tableBody.appendChild(row);
+          });
+        } catch (error) {
+          console.error("Error al cargar los usuarios inactivos:", error);
+        }
+      };
+
+      // Cargar usuarios inactivos al abrir el modal
+      $('#cargarUsuariosInactivos').on('show.bs.modal', function () {
+        cargarUsuariosInactivos();
+      });
+
+
+      // Evento para manejar el clic en el botón de recuperar usuario
+      document.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('recover-btn')) {
+          const idusuario = e.target.getAttribute('data-id');
+
+          try {
+            const response = await axios.put(`http://localhost:3000/api/usuarios/recuperar/${idusuario}`);
+            Swal.fire({
+              title: 'Éxito',
+              text: response.data.message,
+              icon: 'success',
+              confirmButtonText: 'Aceptar',
+            });
+
+            // Recargar la tabla de usuarios inactivos
+            cargarUsuariosInactivos();
+          } catch (error) {
+            console.error("Error al recuperar el usuario:", error);
+            Swal.fire({
+              title: 'Error',
+              text: error.response?.data?.message || 'No se pudo recuperar el usuario.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar',
+            });
+          }
+        }
+      });
+    });
+  </script>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/auth.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Obtener el rol desde sessionStorage
+      const rol = sessionStorage.getItem("rol");
+
+      // Seleccionar el contenedor del navbar
+      const navbarItems = document.getElementById("navbarItems");
+
+      if (rol === "1") {
+        // Si el rol es 1 (administrador), mostrar todos los elementos
+        navbarItems.innerHTML = `
                 <li class="nav-item">
                     <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
                 </li>
@@ -310,9 +566,9 @@
                     <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
                 </li>
             `;
-        } else if (rol === "0") {
-          // Si el rol es 0 (usuario normal), mostrar solo 'Registrar habitación' y 'Cerrar sesión'
-          navbarItems.innerHTML = `
+      } else if (rol === "0") {
+        // Si el rol es 0 (usuario normal), mostrar solo 'Registrar habitación' y 'Cerrar sesión'
+        navbarItems.innerHTML = `
                 <li class="nav-item">
                     <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
                 </li>
@@ -320,17 +576,20 @@
                     <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
                 </li>
             `;
-        }
+      }
 
-        // Asignar el evento de click al botón de cerrar sesión
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) {
-          logoutBtn.addEventListener("click", function () {
-            sessionStorage.removeItem("rol"); // Eliminar el rol de la sesión
-            window.location.href = "login.html"; // Redirigir al login
-          });
-        }
-      });
-    </script>
-  </body>
+      // Asignar el evento de click al botón de cerrar sesión
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", function () {
+          sessionStorage.removeItem("rol"); // Eliminar el rol de la sesión
+          window.location.href = "login.html"; // Redirigir al login
+        });
+      }
+    });
+  </script>
+
+
+</body>
+
 </html>

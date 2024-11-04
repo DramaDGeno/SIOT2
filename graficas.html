@@ -7,6 +7,52 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/stylehistorial.css" />
+
+    <!-- Estilos personalizados -->
+<style>
+    .content-section .box-left,
+    .content-section .box-right {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    /* Asegura que ambas columnas se mantengan en el mismo tamaño */
+    .content-section .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .content-section .box-left,
+    .content-section .box-right {
+        flex-grow: 1;
+    }
+
+    /* Ajustar el ancho de la tabla */
+    .table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    
+    .content-section .box-left {
+    margin-right: 55px; /* Espacio a la derecha de la caja izquierda */
+    
+}
+
+
+    /* Estilo responsivo para pantallas pequeñas */
+    @media (max-width: 768px) {
+        .content-section .box-left,
+        .content-section .box-right {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    }
+</style>
 </head>
 
 <body>
@@ -50,11 +96,39 @@
     </div>
 
 
-   Aquí van unas graficas whoosh
+    <!-- Sección dividida -->
+<div class="content-section container mt-4">
+    <div class="row d-flex">
+        <!-- Tabla de estadísticas -->
+        <div class="col-lg-5 col-md-12 mb-4 box-left p-4">
+            <label for="anioSelect">Seleccione el año:</label>
+            <select id="anioSelect" class="form-control mb-3" onchange="filtrarPorAnio()">
+                <!-- Opciones de años se llenarán mediante JavaScript -->
+            </select>
 
-    
+            <div style="max-height: 314px; overflow-y: auto;">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Año</th>
+                            <th>Mes</th>
+                            <th>Ocupación (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="estadisticasBody">
+                        <!-- Los registros se llenarán aquí mediante JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-   
+        <div class="col-lg-6 col-md-12 mb-4 box-right p-4"> <!-- Div caja grafica -->
+            <div id="barChart" style="width: 100%; height: 400px;"></div> <!-- Contenedor de la gráfica -->
+        </div>
+    </div>
+</div>
+
+       
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
@@ -110,6 +184,218 @@
             }
         });
     </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Función para obtener estadísticas
+        function obtenerEstadisticas() {
+            axios.get('http://localhost:3000/obtener-estadisticas')
+                .then(response => {
+                    const estadisticas = response.data;
+                    const tbody = document.getElementById('estadisticasBody');
+                    tbody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+
+                    // Llenar la tabla con los datos obtenidos
+                    estadisticas.forEach(est => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${est.anio}</td>
+                            <td>${est.mes}</td>
+                            <td>${est.porcentaje.toFixed(2)}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al obtener las estadísticas:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.response?.data.message || 'Hubo un error al obtener las estadísticas',
+                    });
+                });
+        }
+
+        // Llamar a la función al cargar la página
+        obtenerEstadisticas();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    // Cargar los años en el selector
+    function cargarAnios() {
+        axios.get('http://localhost:3000/obtener-anios')
+            .then(response => {
+                const anios = response.data;
+                const anioSelect = document.getElementById('anioSelect');
+                anioSelect.innerHTML = ''; // Limpiar opciones anteriores
+
+                // Añadir cada año como opción en el selector
+                anios.forEach(anio => {
+                    const option = document.createElement('option');
+                    option.value = anio.anio;
+                    option.text = anio.anio;
+                    anioSelect.appendChild(option);
+                });
+
+                // Cargar estadísticas del primer año por defecto
+                if (anios.length > 0) {
+                    obtenerEstadisticas(anios[0].anio);
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener los años:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un error al obtener los años disponibles',
+                });
+            });
+    }
+
+    // Función para obtener estadísticas filtradas por año
+    function obtenerEstadisticas(anio) {
+        axios.get(`http://localhost:3000/obtener-estadisticas?anio=${anio}`)
+            .then(response => {
+                const estadisticas = response.data;
+                const tbody = document.getElementById('estadisticasBody');
+                tbody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+
+                // Llenar la tabla con los datos obtenidos
+                estadisticas.forEach(est => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${est.anio}</td>
+                        <td>${est.mes}</td>
+                        <td>${est.porcentaje.toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error("Error al obtener las estadísticas:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.response?.data.message || 'Hubo un error al obtener las estadísticas',
+                });
+            });
+    }
+
+    // Llama a obtenerEstadisticas cuando el usuario cambie el año seleccionado
+    window.filtrarPorAnio = function () {
+        const anio = document.getElementById('anioSelect').value;
+        obtenerEstadisticas(anio);
+    };
+
+    // Inicializar la carga de años
+    cargarAnios();
+});
+
+</script>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+    google.charts.load('current', {packages: ['corechart']});
+
+    // Función para dibujar la gráfica
+    function drawChart(dataArray) {
+        const data = google.visualization.arrayToDataTable(dataArray);
+
+        const options = {
+            title: 'Porcentaje de Ocupación Hotelera',
+            hAxis: {
+                title: 'Meses',
+                format: 'MMMM', // Formato para mostrar los meses
+            },
+            vAxis: {
+                title: 'Porcentaje de Ocupación (%)',
+                minValue: 0,
+                maxValue: 100, // Rango de 0 a 100
+            },
+            legend: 'none',
+            colors: ['#b0b0b0'], // Color gris para las columnas
+        };
+
+        const chart = new google.visualization.ColumnChart(document.getElementById('barChart'));
+        chart.draw(data, options);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cargar los años en el selector
+        function cargarAnios() {
+            axios.get('http://localhost:3000/obtener-anios')
+                .then(response => {
+                    const anios = response.data;
+                    const anioSelect = document.getElementById('anioSelect');
+                    anioSelect.innerHTML = ''; // Limpiar opciones anteriores
+
+                    // Añadir cada año como opción en el selector
+                    anios.forEach(anio => {
+                        const option = document.createElement('option');
+                        option.value = anio.anio;
+                        option.text = anio.anio;
+                        anioSelect.appendChild(option);
+                    });
+
+                    // Cargar estadísticas del primer año por defecto
+                    if (anios.length > 0) {
+                        obtenerEstadisticas(anios[0].anio);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener los años:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo un error al obtener los años disponibles',
+                    });
+                });
+        }
+
+        // Función para obtener estadísticas filtradas por año
+        function obtenerEstadisticas(anio) {
+            axios.get(`http://localhost:3000/obtener-estadisticas?anio=${anio}`)
+                .then(response => {
+                    const estadisticas = response.data;
+                    const tbody = document.getElementById('estadisticasBody');
+                    tbody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+
+                    // Llenar la tabla con los datos obtenidos y preparar datos para la gráfica
+                    const dataArray = [['Mes', 'Porcentaje de Ocupación (%)']]; // Encabezados para la gráfica
+                    estadisticas.forEach(est => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${est.anio}</td>
+                            <td>${est.mes}</td>
+                            <td>${est.porcentaje.toFixed(2)}</td>
+                        `;
+                        tbody.appendChild(row);
+                        dataArray.push([est.mes, est.porcentaje]); // Agregar datos para la gráfica
+                    });
+
+                    // Dibujar la gráfica
+                    drawChart(dataArray);
+                })
+                .catch(error => {
+                    console.error("Error al obtener las estadísticas:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.response?.data.message || 'Hubo un error al obtener las estadísticas',
+                    });
+                });
+        }
+
+        // Llama a obtenerEstadisticas cuando el usuario cambie el año seleccionado
+        window.filtrarPorAnio = function () {
+            const anio = document.getElementById('anioSelect').value;
+            obtenerEstadisticas(anio);
+        };
+
+        // Inicializar la carga de años
+        cargarAnios();
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 </body>
 
