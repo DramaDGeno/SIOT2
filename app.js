@@ -40,27 +40,24 @@ app.use(
 // Ruta para el login
 app.post("/login", (req, res) => {
   const { usuario, contrasena } = req.body;
-  const query = "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ?";
+  // Actualiza la consulta SQL para incluir la verificación de 'activo'
+  const query = "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ? AND activo = 1";
 
   db.query(query, [usuario, contrasena], (err, results) => {
-    if (err) {
-      return res
-        .status(500)
-        .send({ message: "Error al consultar la base de datos" });
-    }
+      if (err) {
+          return res.status(500).send({ message: "Error al consultar la base de datos" });
+      }
 
-    if (results.length > 0) {
-      const { rol } = results[0];
-      req.session.rol = rol; // Almacena el rol en la sesión
-
-      return res.status(200).send({ message: "Inicio de sesión exitoso", rol });
-    } else {
-      return res
-        .status(401)
-        .send({ message: "Usuario o contraseña incorrectos" });
-    }
+      if (results.length > 0) {
+          const { rol } = results[0];
+          req.session.rol = rol; // Almacena el rol en la sesión
+          return res.status(200).send({ message: "Inicio de sesión exitoso", rol });
+      } else {
+          return res.status(401).send({ message: "Usuario o contraseña incorrectos o cuenta desactivada" });
+      }
   });
 });
+
 
 // Ruta para obtener todos los usuarios activos
 app.get('/api/usuarios', (req, res) => {
@@ -542,6 +539,7 @@ app.get('/obtener-anios', (req, res) => {
     res.status(200).send(results);
   });
 });
+
 
 
 app.listen(port, () => {
