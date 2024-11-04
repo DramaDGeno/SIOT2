@@ -7,6 +7,52 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/stylehistorial.css" />
+<style>
+  /* Estilo para el input de búsqueda */
+.search-container input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+  color: #555;
+  border-radius: 4px;
+  outline: none;
+  width: 100%;
+}
+
+.search-container input:focus {
+  border-color: #ccc; /* Mantener borde gris */
+  background-color: #f1f1f1; /* Mantener fondo gris */
+}
+
+/* Estilo para la paginación */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.pagination-container button {
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  color: #555;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination-container button:disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.pagination-container button:hover:not(:disabled) {
+  background-color: #e1e1e1;
+  border-color: #ddd;
+}
+
+</style>
 </head>
 
 <body>
@@ -49,22 +95,32 @@
     <div class="separator"></div>
   </div>
 
-
-  <table id="historial-table" class="table">
-    <thead>
-      <tr>
-        <th data-field="fecha" data-sortable="true">Fecha</th>
-        <th data-field="tipo">Tipo de Habitación</th>
-        <th data-field="habitacionesocupadas" data-sortable="true">Habitaciones Ocupadas</th>
-        <th data-field="habitacionestotales" data-sortable="true">Habitaciones Totales</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Las filas se llenarán dinámicamente aquí -->
-    </tbody>
-  </table>
-
-
+  <div class="content-section container mt-4">
+    <div class="row d-flex">
+  <div class="col-lg-12 col-md-12 mb-4 box-left p-4">
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Buscar..." />
+    </div>
+    
+    <table id="historial-table" class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo de Habitación</th>
+          <th>Habitaciones Ocupadas</th>
+          <th>Habitaciones Totales</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Las filas se llenarán dinámicamente aquí -->
+      </tbody>
+    </table>
+    <div class="pagination-container">
+      <button id="prevPage" disabled>Anterior</button>
+      <span id="pageInfo"></span>
+      <button id="nextPage">Siguiente</button>
+    </div>
+</div></div></div>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script>
     $(document).ready(function () {
