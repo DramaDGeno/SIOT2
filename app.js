@@ -367,6 +367,58 @@ app.get("/api/historial", (req, res) => {
   });
 });
 
+// Ruta para borrar registros de historico y estadistica por fecha
+app.delete("/borrar-registros/:fecha", (req, res) => {
+  const fecha = req.params.fecha;
+
+  // Paso 1: Verificar si hay registros en la tabla historico
+  const checkHistoricoQuery = "SELECT * FROM historico WHERE fecha = ?";
+  db.query(checkHistoricoQuery, [fecha], (err, results) => {
+      if (err) {
+          return res.status(500).send({ message: "Error al verificar registros de historico" });
+      }
+
+      // Si no hay registros en historico, responder adecuadamente
+      if (results.length === 0) {
+          return res.status(404).send({ message: `No se encontraron registros en historico para la fecha ${fecha}` });
+      }
+
+      // Paso 2: Borrar los registros en la tabla historico
+      const deleteHistoricoQuery = "DELETE FROM historico WHERE fecha = ?";
+      db.query(deleteHistoricoQuery, [fecha], (err) => {
+          if (err) {
+              return res.status(500).send({ message: "Error al borrar registros de historico" });
+          }
+
+          // Paso 3: Verificar si hay registros en la tabla estadistica
+          const checkEstadisticaQuery = "SELECT * FROM estadistica WHERE fecha = ?";
+          db.query(checkEstadisticaQuery, [fecha], (err, results) => {
+              if (err) {
+                  return res.status(500).send({ message: "Error al verificar registros de estadistica" });
+              }
+
+              // Si no hay registros en estadistica, solo se borran los de historico
+              if (results.length === 0) {
+                  return res.status(200).send({ message: `Registros borrados de historico para la fecha ${fecha}, pero no se encontraron registros en estadistica.` });
+              }
+
+              // Paso 4: Borrar el registro en la tabla estadistica
+              const deleteEstadisticaQuery = "DELETE FROM estadistica WHERE fecha = ?";
+              db.query(deleteEstadisticaQuery, [fecha], (err) => {
+                  if (err) {
+                      return res.status(500).send({ message: "Error al borrar el registro de estadistica" });
+                  }
+
+                  // Respuesta exitosa
+                  res.status(200).send({ message: `Registros borrados para la fecha ${fecha}` });
+              });
+          });
+      });
+  });
+});
+
+
+
 app.post("/guardar-historico", (req, res) => {
   const { fecha, habitaciones } = req.body;
 

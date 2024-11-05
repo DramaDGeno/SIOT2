@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/stylehistorial.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+
 <style>
   /* Estilo para el input de búsqueda */
 .search-container input {
@@ -52,6 +54,18 @@
   border-color: #ddd;
 }
 
+.search-container {
+  margin-right: 8px; /* Ajusta el valor según el espacio que necesites */
+}
+
+#deleteRecordsBtn {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 </style>
 </head>
 
@@ -94,34 +108,79 @@
     <h1>Histórico</h1>
     <div class="separator"></div>
   </div>
+ 
 
+  
   <div class="content-section container mt-4">
     <div class="row d-flex">
-  <div class="col-lg-12 col-md-12 mb-4 box-left p-4">
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="Buscar..." />
+      <div class="col-lg-12 col-md-12 mb-4 box-left p-4">
+        
+        <!-- Contenedor de búsqueda y botón "Borrar registros" -->
+        <div class="d-flex align-items-stretch mb-3">
+          <div class="search-container flex-grow-1 me-2">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar..." />
+          </div>
+          
+          <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#deleteRecordsModal" data-toggle="tooltip" data-placement="right" title="¿Cometiste un error al registrar la ocupación de cierto día? Borra aquí">
+            Borrar registros
+          </button>
+          
+          
+        </div>
+        
+        <!-- Tabla de historial -->
+        <table id="historial-table" class="table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo de Habitación</th>
+              <th>Habitaciones Ocupadas</th>
+              <th>Habitaciones Totales</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Las filas se llenarán dinámicamente aquí -->
+          </tbody>
+        </table>
+        
+        <!-- Contenedor de paginación -->
+        <div class="pagination-container">
+          <button id="prevPage" disabled>Anterior</button>
+          <span id="pageInfo"></span>
+          <button id="nextPage">Siguiente</button>
+        </div>
+        
+      </div>
     </div>
-    
-    <table id="historial-table" class="table">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Tipo de Habitación</th>
-          <th>Habitaciones Ocupadas</th>
-          <th>Habitaciones Totales</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Las filas se llenarán dinámicamente aquí -->
-      </tbody>
-    </table>
-    <div class="pagination-container">
-      <button id="prevPage" disabled>Anterior</button>
-      <span id="pageInfo"></span>
-      <button id="nextPage">Siguiente</button>
+  </div>
+  
+  <!-- Modal de eliminar registros -->
+<div class="modal fade" id="deleteRecordsModal" tabindex="-1" role="dialog" aria-labelledby="deleteRecordsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteRecordsModalLabel" id="borrar-registros">Eliminar Registros</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="delete-records-form">
+          <div class="form-group">
+            <label for="delete-date">Selecciona la fecha:</label>
+            <input type="date" class="form-control" id="delete-date" required />
+          </div>
+          <button type="submit" class="btn btn-dark">Borrar</button>
+        </form>
+      </div>
     </div>
-</div></div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  
   <script>
     $(document).ready(function () {
       // Usamos fetch para obtener los datos de la API
@@ -166,7 +225,45 @@
   <script src="/auth.js"></script> 
   <script src="pagination.js"></script> 
  
-
+  <script>
+    // Función para cargar los datos históricos
+    function cargarHistorico() {
+      fetch('http://127.0.0.1:3000/api/historial')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al obtener el historial');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const tableBody = document.querySelector('#historial-table tbody');
+          tableBody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+  
+          data.forEach(item => {
+            const fechaFormateada = new Date(item.fecha).toLocaleDateString(); // Formato legible
+            const row = `<tr>
+                          <td>${fechaFormateada}</td>
+                          <td>${item.tipo}</td>
+                          <td>${item.habitacionesocupadas}</td>
+                          <td>${item.habitacionestotales}</td>
+                        </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row); // Agregar la fila a la tabla
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudieron cargar los datos históricos.'
+          });
+        });
+    }
+  
+    // Llamar a cargarHistorico al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarHistorico);
+  </script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Obtener el rol desde sessionStorage
@@ -216,6 +313,50 @@
         }
     });
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteForm = document.getElementById("delete-records-form");
+    
+    deleteForm.addEventListener("submit", function (event) {
+      event.preventDefault(); // Evitar el envío del formulario por defecto
+
+      const fechaSeleccionada = document.getElementById("delete-date").value; // Obtener la fecha seleccionada
+
+      // Confirmar la acción con SweetAlert
+      Swal.fire({
+        title: '¿Estás seguro de borrar los registros con la fecha ' + fechaSeleccionada + '?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, borrar',
+        cancelButtonText: 'No, cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Hacer la solicitud para borrar registros
+          axios.delete(`http://localhost:3000/borrar-registros/${fechaSeleccionada}`)
+            .then((response) => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Borrado!',
+                text: response.data.message,
+              });
+              cargarHistorico(); // Volver a cargar los datos
+            })
+            .catch((error) => {
+              const errorMessage = error.response?.data.message || 'Hubo un error al borrar los registros';
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: errorMessage,
+              });
+            });
+        }
+      });
+    });
+  });
+</script>
+
+
+
 
 </body>
 
