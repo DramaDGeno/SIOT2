@@ -41,116 +41,136 @@ app.use(
 app.post("/login", (req, res) => {
   const { usuario, contrasena } = req.body;
   // Actualiza la consulta SQL para incluir la verificación de 'activo'
-  const query = "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ? AND activo = 1";
+  const query =
+    "SELECT * FROM usuarios WHERE usuario = ? AND contrasena = ? AND activo = 1";
 
   db.query(query, [usuario, contrasena], (err, results) => {
-      if (err) {
-          return res.status(500).send({ message: "Error al consultar la base de datos" });
-      }
+    if (err) {
+      return res
+        .status(500)
+        .send({ message: "Error al consultar la base de datos" });
+    }
 
-      if (results.length > 0) {
-          const { rol } = results[0];
-          req.session.rol = rol; // Almacena el rol en la sesión
-          return res.status(200).send({ message: "Inicio de sesión exitoso", rol });
-      } else {
-          return res.status(401).send({ message: "Usuario o contraseña incorrectos o cuenta desactivada" });
-      }
+    if (results.length > 0) {
+      const { rol } = results[0];
+      req.session.rol = rol; // Almacena el rol en la sesión
+      return res.status(200).send({ message: "Inicio de sesión exitoso", rol });
+    } else {
+      return res
+        .status(401)
+        .send({
+          message: "Usuario o contraseña incorrectos o cuenta desactivada",
+        });
+    }
   });
 });
 
-
 // Ruta para obtener todos los usuarios activos
-app.get('/api/usuarios', (req, res) => {
-  const query = 'SELECT idusuario, nombre, usuario, rol FROM usuarios WHERE activo = 1';
+app.get("/api/usuarios", (req, res) => {
+  const query =
+    "SELECT idusuario, nombre, usuario, rol FROM usuarios WHERE activo = 1";
 
   db.query(query, (error, results) => {
     if (error) {
-      console.error('Error al obtener los usuarios:', error);
-      res.status(500).json({ message: 'Error al obtener los usuarios' });
+      console.error("Error al obtener los usuarios:", error);
+      res.status(500).json({ message: "Error al obtener los usuarios" });
     } else {
       res.json(results); // Enviar los usuarios activos como respuesta en formato JSON
     }
   });
 });
 
-
 // Ruta para crear un nuevo usuario
 app.post("/api/usuarios/crear", (req, res) => {
   const { nombre, usuario, contrasena, rol } = req.body;
-  const rolBooleano = rol === 'admin'; // 'admin' se convierte en true, otros en false
+  const rolBooleano = rol === "admin"; // 'admin' se convierte en true, otros en false
 
   // Consulta para verificar si el nombre de usuario ya existe
-  const queryCheck = "SELECT usuario FROM usuarios WHERE LOWER(usuario) = LOWER(?)";
+  const queryCheck =
+    "SELECT usuario FROM usuarios WHERE LOWER(usuario) = LOWER(?)";
 
   // Consulta para insertar un nuevo usuario con el campo activo en 1
-  const queryInsert = "INSERT INTO usuarios (nombre, usuario, contrasena, rol, activo) VALUES (?, ?, ?, ?, 1)";
+  const queryInsert =
+    "INSERT INTO usuarios (nombre, usuario, contrasena, rol, activo) VALUES (?, ?, ?, ?, 1)";
 
   // Validar que el nombre de usuario no esté vacío
   if (!usuario || !nombre || !contrasena) {
-    return res.status(400).send({ message: "Todos los campos son obligatorios." });
+    return res
+      .status(400)
+      .send({ message: "Todos los campos son obligatorios." });
   }
 
   // Verificar si el usuario ya existe
   db.query(queryCheck, [usuario], (error, results) => {
     if (error) {
-      console.error('Error al verificar el usuario:', error);
-      return res.status(500).json({ message: 'Error al verificar el usuario' });
+      console.error("Error al verificar el usuario:", error);
+      return res.status(500).json({ message: "Error al verificar el usuario" });
     }
 
     if (results.length > 0) {
-      return res.status(400).send({ message: "El nombre de usuario ya existe." });
+      return res
+        .status(400)
+        .send({ message: "El nombre de usuario ya existe." });
     }
 
     // Si el usuario no existe, proceder a la inserción
-    db.query(queryInsert, [nombre, usuario, contrasena, rolBooleano], (error, results) => {
-      if (error) {
-        console.error('Error al crear el usuario:', error);
-        return res.status(500).json({ message: 'Error al crear el usuario' });
-      } else {
-        res.status(201).json({ message: 'Usuario creado', idusuario: results.insertId });
+    db.query(
+      queryInsert,
+      [nombre, usuario, contrasena, rolBooleano],
+      (error, results) => {
+        if (error) {
+          console.error("Error al crear el usuario:", error);
+          return res.status(500).json({ message: "Error al crear el usuario" });
+        } else {
+          res
+            .status(201)
+            .json({ message: "Usuario creado", idusuario: results.insertId });
+        }
       }
-    });
+    );
   });
 });
 
 // Ruta para obtener usuarios inactivos
-app.get('/api/usuarios/inactivos', (req, res) => {
-  const query = 'SELECT idusuario, nombre, usuario FROM usuarios WHERE activo = 0';
+app.get("/api/usuarios/inactivos", (req, res) => {
+  const query =
+    "SELECT idusuario, nombre, usuario FROM usuarios WHERE activo = 0";
 
   db.query(query, (error, results) => {
-      if (error) {
-          console.error('Error al obtener usuarios inactivos:', error);
-          return res.status(500).json({ message: 'Error al obtener usuarios inactivos' });
-      }
+    if (error) {
+      console.error("Error al obtener usuarios inactivos:", error);
+      return res
+        .status(500)
+        .json({ message: "Error al obtener usuarios inactivos" });
+    }
 
-      res.json(results); // Enviar los usuarios inactivos como respuesta en formato JSON
+    res.json(results); // Enviar los usuarios inactivos como respuesta en formato JSON
   });
 });
 
-
 // Ruta para obtener un usuario por ID
-app.get('/api/usuarios/:idusuario', (req, res) => {
+app.get("/api/usuarios/:idusuario", (req, res) => {
   const idusuario = req.params.idusuario;
 
-  const query = 'SELECT idusuario, nombre, usuario, rol, activo FROM usuarios WHERE idusuario = ?';
+  const query =
+    "SELECT idusuario, nombre, usuario, rol, activo FROM usuarios WHERE idusuario = ?";
 
   db.query(query, [idusuario], (error, results) => {
     if (error) {
-      console.error('Error al obtener el usuario:', error);
-      return res.status(500).json({ message: 'Error al obtener el usuario' });
+      console.error("Error al obtener el usuario:", error);
+      return res.status(500).json({ message: "Error al obtener el usuario" });
     }
 
     if (results.length > 0) {
       res.json(results[0]);
     } else {
-      res.status(404).json({ message: 'Usuario no encontrado' });
+      res.status(404).json({ message: "Usuario no encontrado" });
     }
   });
 });
 
-
 // Ruta para actualizar un usuario
-app.put('/api/usuarios/:id', (req, res) => {
+app.put("/api/usuarios/:id", (req, res) => {
   const idusuario = req.params.id;
   const { nombre, usuario, contrasena, rol } = req.body;
 
@@ -158,66 +178,72 @@ app.put('/api/usuarios/:id', (req, res) => {
   const query = `
     UPDATE usuarios 
     SET nombre = ?, usuario = ?, rol = ?
-    ${contrasena ? ', contrasena = ?' : ''}
+    ${contrasena ? ", contrasena = ?" : ""}
     WHERE idusuario = ? AND activo = 1`;
 
   // Armar los valores a actualizar
-  const values = contrasena ? [nombre, usuario, rol, contrasena, idusuario] : [nombre, usuario, rol, idusuario];
+  const values = contrasena
+    ? [nombre, usuario, rol, contrasena, idusuario]
+    : [nombre, usuario, rol, idusuario];
 
   db.query(query, values, (error, results) => {
     if (error) {
-      console.error('Error al actualizar el usuario:', error);
-      return res.status(500).json({ message: 'Error al actualizar el usuario' });
+      console.error("Error al actualizar el usuario:", error);
+      return res
+        .status(500)
+        .json({ message: "Error al actualizar el usuario" });
     }
 
     if (results.affectedRows > 0) {
-      res.json({ message: 'Usuario actualizado con éxito' });
+      res.json({ message: "Usuario actualizado con éxito" });
     } else {
-      res.status(404).json({ message: 'Usuario no encontrado o inactivo' });
+      res.status(404).json({ message: "Usuario no encontrado o inactivo" });
     }
   });
 });
 
-
 // Ruta para desactivar un usuario (soft delete)
-app.delete('/api/usuarios/:id', (req, res) => {
+app.delete("/api/usuarios/:id", (req, res) => {
   const idusuario = req.params.id;
 
-  const query = 'UPDATE usuarios SET activo = 0 WHERE idusuario = ?';
+  const query = "UPDATE usuarios SET activo = 0 WHERE idusuario = ?";
 
   db.query(query, [idusuario], (error, results) => {
     if (error) {
-      console.error('Error al desactivar el usuario:', error);
-      return res.status(500).json({ message: 'Error al desactivar el usuario' });
+      console.error("Error al desactivar el usuario:", error);
+      return res
+        .status(500)
+        .json({ message: "Error al desactivar el usuario" });
     }
 
     if (results.affectedRows > 0) {
-      res.json({ message: 'Usuario desactivado con éxito' });
+      res.json({ message: "Usuario desactivado con éxito" });
     } else {
-      res.status(404).json({ message: 'Usuario no encontrade' });
+      res.status(404).json({ message: "Usuario no encontrade" });
     }
   });
 });
 
-
 // Ruta para recuperar un usuario
-app.put('/api/usuarios/recuperar/:idusuario', (req, res) => {
+app.put("/api/usuarios/recuperar/:idusuario", (req, res) => {
   const idusuario = req.params.idusuario;
 
   // Consulta para actualizar el estado a activo
-  const query = 'UPDATE usuarios SET activo = 1 WHERE idusuario = ?';
+  const query = "UPDATE usuarios SET activo = 1 WHERE idusuario = ?";
 
   db.query(query, [idusuario], (error, results) => {
-      if (error) {
-          console.error('Error al recuperar el usuario:', error);
-          return res.status(500).json({ message: 'Error al recuperar el usuario' });
-      }
+    if (error) {
+      console.error("Error al recuperar el usuario:", error);
+      return res.status(500).json({ message: "Error al recuperar el usuario" });
+    }
 
-      if (results.affectedRows > 0) {
-          res.json({ message: 'Usuario recuperado con éxito' });
-      } else {
-          res.status(404).json({ message: 'Usuario no encontrado o ya está activo' });
-      }
+    if (results.affectedRows > 0) {
+      res.json({ message: "Usuario recuperado con éxito" });
+    } else {
+      res
+        .status(404)
+        .json({ message: "Usuario no encontrado o ya está activo" });
+    }
   });
 });
 
@@ -374,53 +400,70 @@ app.delete("/borrar-registros/:fecha", (req, res) => {
   // Paso 1: Verificar si hay registros en la tabla historico
   const checkHistoricoQuery = "SELECT * FROM historico WHERE fecha = ?";
   db.query(checkHistoricoQuery, [fecha], (err, results) => {
+    if (err) {
+      return res
+        .status(500)
+        .send({ message: "Error al verificar registros de historico" });
+    }
+
+    // Si no hay registros en historico, responder adecuadamente
+    if (results.length === 0) {
+      return res
+        .status(404)
+        .send({
+          message: `No se encontraron registros en historico para la fecha ${fecha}`,
+        });
+    }
+
+    // Paso 2: Borrar los registros en la tabla historico
+    const deleteHistoricoQuery = "DELETE FROM historico WHERE fecha = ?";
+    db.query(deleteHistoricoQuery, [fecha], (err) => {
       if (err) {
-          return res.status(500).send({ message: "Error al verificar registros de historico" });
+        return res
+          .status(500)
+          .send({ message: "Error al borrar registros de historico" });
       }
 
-      // Si no hay registros en historico, responder adecuadamente
-      if (results.length === 0) {
-          return res.status(404).send({ message: `No se encontraron registros en historico para la fecha ${fecha}` });
-      }
+      // Paso 3: Verificar si hay registros en la tabla estadistica
+      const checkEstadisticaQuery = "SELECT * FROM estadistica WHERE fecha = ?";
+      db.query(checkEstadisticaQuery, [fecha], (err, results) => {
+        if (err) {
+          return res
+            .status(500)
+            .send({ message: "Error al verificar registros de estadistica" });
+        }
 
-      // Paso 2: Borrar los registros en la tabla historico
-      const deleteHistoricoQuery = "DELETE FROM historico WHERE fecha = ?";
-      db.query(deleteHistoricoQuery, [fecha], (err) => {
+        // Si no hay registros en estadistica, solo se borran los de historico
+        if (results.length === 0) {
+          return res
+            .status(200)
+            .send({
+              message: `Registros borrados de historico para la fecha ${fecha}, pero no se encontraron registros en estadistica.`,
+            });
+        }
+
+        // Paso 4: Borrar el registro en la tabla estadistica
+        const deleteEstadisticaQuery =
+          "DELETE FROM estadistica WHERE fecha = ?";
+        db.query(deleteEstadisticaQuery, [fecha], (err) => {
           if (err) {
-              return res.status(500).send({ message: "Error al borrar registros de historico" });
+            return res
+              .status(500)
+              .send({ message: "Error al borrar el registro de estadistica" });
           }
 
-          // Paso 3: Verificar si hay registros en la tabla estadistica
-          const checkEstadisticaQuery = "SELECT * FROM estadistica WHERE fecha = ?";
-          db.query(checkEstadisticaQuery, [fecha], (err, results) => {
-              if (err) {
-                  return res.status(500).send({ message: "Error al verificar registros de estadistica" });
-              }
-
-              // Si no hay registros en estadistica, solo se borran los de historico
-              if (results.length === 0) {
-                  return res.status(200).send({ message: `Registros borrados de historico para la fecha ${fecha}, pero no se encontraron registros en estadistica.` });
-              }
-
-              // Paso 4: Borrar el registro en la tabla estadistica
-              const deleteEstadisticaQuery = "DELETE FROM estadistica WHERE fecha = ?";
-              db.query(deleteEstadisticaQuery, [fecha], (err) => {
-                  if (err) {
-                      return res.status(500).send({ message: "Error al borrar el registro de estadistica" });
-                  }
-
-                  // Respuesta exitosa
-                  res.status(200).send({ message: `Registros borrados para la fecha ${fecha}` });
-              });
-          });
+          // Respuesta exitosa
+          res
+            .status(200)
+            .send({ message: `Registros borrados para la fecha ${fecha}` });
+        });
       });
+    });
   });
 });
 
-
-
 app.post("/guardar-historico", (req, res) => {
-  const { fecha, habitaciones } = req.body;
+  const { fecha, habitaciones, usuario } = req.body; // Ahora recibimos 'usuario'
 
   // Paso 1: Verificar si ya existen registros para la fecha
   const checkQuery = "SELECT COUNT(*) AS count FROM historico WHERE fecha = ?";
@@ -458,11 +501,9 @@ app.post("/guardar-historico", (req, res) => {
             .send({ message: `Tipo de habitación '${tipo}' no encontrado` });
         }
         if (ocupadas > cantidadDisponible) {
-          return res
-            .status(400)
-            .send({
-              message: `No se pueden registrar más de ${cantidadDisponible} habitaciones de tipo ${tipo}`,
-            });
+          return res.status(400).send({
+            message: `No se pueden registrar más de ${cantidadDisponible} habitaciones de tipo ${tipo}`,
+          });
         }
       }
 
@@ -512,53 +553,118 @@ app.post("/guardar-historico", (req, res) => {
           );
           const porcentaje = (totalOcupadas / totalHabitaciones) * 100;
 
-          // Convertir la fecha al nombre del mes de forma segura
-          const [year, month, day] = fecha.split("-"); // Dividir la fecha en año, mes y día
-          const fechaObj = new Date(year, month - 1, day); // Crear fecha con mes correcto (0 = enero, 11 = diciembre)
-          const mesNumerico = fechaObj.getMonth(); // Obtener el índice del mes (0 para enero, 11 para diciembre)
-          
-          // Mapear el índice del mes a su nombre en español
-          const meses = [
-            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-          ];
-          const mes = meses[mesNumerico];
+          // Insertar también en la tabla 'historialoperaciones'
+          const fechaActual = new Date();
+          fechaActual.setHours(fechaActual.getHours() - 6); // Ajusta la diferencia horaria (UTC -6)
 
-          // Insertar el porcentaje y el mes en la tabla 'estadistica'
-          const insertEstadisticaQuery = `
-            INSERT INTO estadistica (fecha, porcentaje, mes) 
-            VALUES (?, ?, ?)
-          `;
-          db.query(insertEstadisticaQuery, [fecha, porcentaje, mes], (err) => {
-            if (err) {
-              return res
-                .status(500)
-                .send({ message: "Error al insertar en la tabla estadistica" });
-            }
+          const fechaOperacion = fechaActual
+            .toISOString()
+            .slice(0, 19)
+            .replace("T", " "); // Formato 'YYYY-MM-DD HH:MM:SS'
 
-            // Respuesta exitosa
-            res
-              .status(201)
-              .send({
-                message:
-                  "Registros históricos y estadística guardados exitosamente",
+          const promesasOperaciones = Object.entries(habitaciones).map(
+            ([tipo, ocupadas]) => {
+              return new Promise((resolve, reject) => {
+                const tipoQuery =
+                  "SELECT idtipo FROM tipohabitacion WHERE tipo = ?";
+                db.query(tipoQuery, [tipo], (err, tipoResult) => {
+                  if (err || tipoResult.length === 0) {
+                    return reject(
+                      err || new Error("Tipo de habitación no encontrado")
+                    );
+                  }
+
+                  const idtipo = tipoResult[0].idtipo;
+
+                  // Insertar en la tabla 'historialoperaciones'
+                  const insertOperacionesQuery = `
+                  INSERT INTO historialoperaciones (idtipo, fecha, habitacionesocupadas, habitacionestotales, usuario, fechaoperacion, tipooperacion) 
+  VALUES (?, ?, ?, ?, ?, ?, 'REGISTRO OCUPACION')
+                `;
+                  db.query(
+                    insertOperacionesQuery,
+                    [
+                      idtipo,
+                      fecha,
+                      ocupadas,
+                      totalHabitaciones,
+                      usuario,
+                      fechaOperacion,
+                    ],
+                    (err) => {
+                      if (err) return reject(err);
+                      resolve();
+                    }
+                  );
+                });
               });
-          });
+            }
+          );
+
+          // Ejecutar todas las promesas de inserción en 'historialoperaciones'
+          Promise.all(promesasOperaciones)
+            .then(() => {
+              // Convertir la fecha al nombre del mes de forma segura
+              const [year, month, day] = fecha.split("-"); // Dividir la fecha en año, mes y día
+              const fechaObj = new Date(year, month - 1, day); // Crear fecha con mes correcto (0 = enero, 11 = diciembre)
+              const mesNumerico = fechaObj.getMonth(); // Obtener el índice del mes (0 para enero, 11 para diciembre)
+
+              // Mapear el índice del mes a su nombre en español
+              const meses = [
+                "Enero",
+                "Febrero",
+                "Marzo",
+                "Abril",
+                "Mayo",
+                "Junio",
+                "Julio",
+                "Agosto",
+                "Septiembre",
+                "Octubre",
+                "Noviembre",
+                "Diciembre",
+              ];
+              const mes = meses[mesNumerico];
+
+              // Insertar el porcentaje y el mes en la tabla 'estadistica'
+              const insertEstadisticaQuery = `
+                INSERT INTO estadistica (fecha, porcentaje, mes) 
+                VALUES (?, ?, ?)
+              `;
+              db.query(
+                insertEstadisticaQuery,
+                [fecha, porcentaje, mes],
+                (err) => {
+                  if (err) {
+                    return res
+                      .status(500)
+                      .send({
+                        message: "Error al insertar en la tabla estadistica",
+                      });
+                  }
+
+                  // Respuesta exitosa
+                  res.status(201).send({
+                    message:
+                      "Registros históricos y estadística guardados exitosamente",
+                  });
+                }
+              );
+            })
+            .catch((err) => res.status(500).send({ message: err.message }));
         })
         .catch((err) => res.status(500).send({ message: err.message }));
     });
   });
 });
 
-
-
-app.get('/obtener-estadisticas', (req, res) => {
+app.get("/obtener-estadisticas", (req, res) => {
   const { anio } = req.query;
   let query = `
     SELECT YEAR(fecha) AS anio, mes, AVG(porcentaje) AS porcentaje
     FROM estadistica
   `;
-  
+
   if (anio) {
     query += ` WHERE YEAR(fecha) = ${db.escape(anio)} `;
   }
@@ -570,14 +676,15 @@ app.get('/obtener-estadisticas', (req, res) => {
 
   db.query(query, (err, results) => {
     if (err) {
-      return res.status(500).send({ message: 'Error al obtener las estadísticas' });
+      return res
+        .status(500)
+        .send({ message: "Error al obtener las estadísticas" });
     }
     res.status(200).send(results);
   });
 });
 
-
-app.get('/obtener-anios', (req, res) => {
+app.get("/obtener-anios", (req, res) => {
   const query = `
     SELECT DISTINCT YEAR(fecha) AS anio
     FROM estadistica
@@ -586,13 +693,11 @@ app.get('/obtener-anios', (req, res) => {
 
   db.query(query, (err, results) => {
     if (err) {
-      return res.status(500).send({ message: 'Error al obtener los años' });
+      return res.status(500).send({ message: "Error al obtener los años" });
     }
     res.status(200).send(results);
   });
 });
-
-
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);

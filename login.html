@@ -77,6 +77,7 @@
             .then((response) => {
               const rol = response.data.rol;
               sessionStorage.setItem("rol", rol); // Almacena el rol en sessionStorage
+              sessionStorage.setItem("usuario", usuario); // Almacena el usuario en sessionStorage
               Swal.fire({
                 title: "Inicio de sesión exitoso",
                 text: "Bienvenido al sistema.",

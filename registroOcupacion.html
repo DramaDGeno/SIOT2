@@ -435,51 +435,56 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Establecer la fecha actual al abrir la página
-      const today = new Date().toISOString().split("T")[0];
-      document.getElementById("fecha").value = today;
+  // Establecer la fecha actual al abrir la página
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("fecha").value = today;
 
-      document.getElementById("form-historico").addEventListener("submit", function (event) {
-        event.preventDefault();
+  document.getElementById("form-historico").addEventListener("submit", function (event) {
+    event.preventDefault();
 
-        // Obtener la fecha del formulario
-        const fecha = document.getElementById("fecha").value;
+    // Obtener la fecha del formulario
+    const fecha = document.getElementById("fecha").value;
 
-        // Crear un objeto con las cantidades de habitaciones ocupadas
-        const habitaciones = {};
-        document.querySelectorAll("#habitaciones-dinamicas input").forEach((input) => {
-          habitaciones[input.name.toLowerCase()] = input.value; // Asegúrate de que el nombre esté en minúsculas
+    // Crear un objeto con las cantidades de habitaciones ocupadas
+    const habitaciones = {};
+    document.querySelectorAll("#habitaciones-dinamicas input").forEach((input) => {
+      habitaciones[input.name.toLowerCase()] = input.value; // Asegúrate de que el nombre esté en minúsculas
+    });
+
+    // Obtener el usuario de la sesión
+    const usuario = sessionStorage.getItem("usuario");
+
+    // Enviar los datos al servidor
+    axios
+      .post("http://localhost:3000/guardar-historico", {
+        fecha,
+        habitaciones,
+        usuario,  // Agregar el usuario a los datos enviados
+      })
+      .then((response) => {
+        console.log("Registros guardados:", response.data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: 'Registros guardados exitosamente',
         });
 
-        // Enviar los datos al servidor
-        axios
-          .post("http://localhost:3000/guardar-historico", {
-            fecha,
-            habitaciones,
-          })
-          .then((response) => {
-            console.log("Registros guardados:", response.data);
-            Swal.fire({
-              icon: 'success',
-              title: 'Éxito',
-              text: 'Registros guardados exitosamente',
-            });
-
-            // Limpiar los inputs de habitaciones (menos la fecha)
-            document.querySelectorAll("#habitaciones-dinamicas input").forEach((input) => {
-              input.value = ''; // Limpiar cada input
-            });
-          })
-          .catch((error) => {
-            console.error("Error al guardar los registros:", error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: error.response?.data.message || 'Hubo un error al guardar los registros',
-            });
-          });
+        // Limpiar los inputs de habitaciones (menos la fecha)
+        document.querySelectorAll("#habitaciones-dinamicas input").forEach((input) => {
+          input.value = ''; // Limpiar cada input
+        });
+      })
+      .catch((error) => {
+        console.error("Error al guardar los registros:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.response?.data.message || 'Hubo un error al guardar los registros',
+        });
       });
-    });
+  });
+});
+
   </script>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -531,6 +536,7 @@
       if (logoutBtn) {
         logoutBtn.addEventListener('click', function () {
           sessionStorage.removeItem('rol'); // Eliminar el rol de la sesión
+          sessionStorage.removeItem('usuario'); // Eliminar el usuario de la sesión
           window.location.href = "login.html"; // Redirigir al login
         });
       }

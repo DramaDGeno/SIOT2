@@ -308,6 +308,7 @@
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function() {
                 sessionStorage.removeItem('rol'); // Eliminar el rol de la sesión
+                sessionStorage.removeItem('usuario'); // Eliminar el usuario de la sesión
                 window.location.href = "login.html"; // Redirigir al login
             });
         }
