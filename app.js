@@ -393,74 +393,59 @@ app.get("/api/historial", (req, res) => {
   });
 });
 
-// Ruta para borrar registros de historico y estadistica por fecha
-app.delete("/borrar-registros/:fecha", (req, res) => {
+app.delete("/borrar-registros/:fecha", async (req, res) => {
   const fecha = req.params.fecha;
+  const usuario = req.body.usuario; 
+  const fechaOperacion = new Date(new Date().getTime());
 
-  // Paso 1: Verificar si hay registros en la tabla historico
-  const checkHistoricoQuery = "SELECT * FROM historico WHERE fecha = ?";
-  db.query(checkHistoricoQuery, [fecha], (err, results) => {
-    if (err) {
-      return res
-        .status(500)
-        .send({ message: "Error al verificar registros de historico" });
+  try {
+    // Verificar registros en historico
+    const checkHistoricoQuery = "SELECT * FROM historico WHERE fecha = ?";
+    const [historicoResults] = await db.promise().query(checkHistoricoQuery, [fecha]);
+
+    if (historicoResults.length === 0) {
+      return res.status(404).send({ message: `No se encontraron registros en historico para la fecha ${fecha}` });
     }
 
-    // Si no hay registros en historico, responder adecuadamente
-    if (results.length === 0) {
-      return res
-        .status(404)
-        .send({
-          message: `No se encontraron registros en historico para la fecha ${fecha}`,
-        });
-    }
-
-    // Paso 2: Borrar los registros en la tabla historico
-    const deleteHistoricoQuery = "DELETE FROM historico WHERE fecha = ?";
-    db.query(deleteHistoricoQuery, [fecha], (err) => {
-      if (err) {
-        return res
-          .status(500)
-          .send({ message: "Error al borrar registros de historico" });
-      }
-
-      // Paso 3: Verificar si hay registros en la tabla estadistica
-      const checkEstadisticaQuery = "SELECT * FROM estadistica WHERE fecha = ?";
-      db.query(checkEstadisticaQuery, [fecha], (err, results) => {
-        if (err) {
-          return res
-            .status(500)
-            .send({ message: "Error al verificar registros de estadistica" });
-        }
-
-        // Si no hay registros en estadistica, solo se borran los de historico
-        if (results.length === 0) {
-          return res
-            .status(200)
-            .send({
-              message: `Registros borrados de historico para la fecha ${fecha}, pero no se encontraron registros en estadistica.`,
-            });
-        }
-
-        // Paso 4: Borrar el registro en la tabla estadistica
-        const deleteEstadisticaQuery =
-          "DELETE FROM estadistica WHERE fecha = ?";
-        db.query(deleteEstadisticaQuery, [fecha], (err) => {
-          if (err) {
-            return res
-              .status(500)
-              .send({ message: "Error al borrar el registro de estadistica" });
-          }
-
-          // Respuesta exitosa
-          res
-            .status(200)
-            .send({ message: `Registros borrados para la fecha ${fecha}` });
-        });
-      });
+    // Insertar en historialoperaciones antes de borrar
+    const insertPromises = historicoResults.map(record => {
+      const insertQuery = `
+        INSERT INTO historialoperaciones (idtipo, fecha, habitacionesocupadas, habitacionestotales, usuario, fechaoperacion, tipooperacion)
+        VALUES (?, ?, ?, ?, ?, ?, 'ELIMINACION')
+      `;
+      return db.promise().query(insertQuery, [
+        record.idtipo,
+        record.fecha,
+        record.habitacionesocupadas,
+        record.habitacionestotales,
+        usuario,
+        fechaOperacion,
+      ]);
     });
-  });
+
+    await Promise.all(insertPromises);
+
+    // Borrar registros en historico
+    const deleteHistoricoQuery = "DELETE FROM historico WHERE fecha = ?";
+    await db.promise().query(deleteHistoricoQuery, [fecha]);
+
+    // Verificar y borrar registros en estadistica
+    const checkEstadisticaQuery = "SELECT * FROM estadistica WHERE fecha = ?";
+    const [estadisticaResults] = await db.promise().query(checkEstadisticaQuery, [fecha]);
+
+    if (estadisticaResults.length > 0) {
+      const deleteEstadisticaQuery = "DELETE FROM estadistica WHERE fecha = ?";
+      await db.promise().query(deleteEstadisticaQuery, [fecha]);
+    }
+
+    res.status(200).send({ message: `Registros borrados para la fecha ${fecha}` });
+
+  } catch (error) {
+    console.error("Error en el proceso de eliminación:", error);
+    res.status(500).send({ message: "Error interno al procesar la eliminación de registros" });
+  }
 });
+
 
 app.post("/guardar-historico", (req, res) => {
   const { fecha, habitaciones, usuario } = req.body; // Ahora recibimos 'usuario'

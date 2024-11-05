@@ -317,13 +317,12 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const deleteForm = document.getElementById("delete-records-form");
-    
+
     deleteForm.addEventListener("submit", function (event) {
-      event.preventDefault(); // Evitar el envío del formulario por defecto
+      event.preventDefault();
 
-      const fechaSeleccionada = document.getElementById("delete-date").value; // Obtener la fecha seleccionada
+      const fechaSeleccionada = document.getElementById("delete-date").value;
 
-      // Confirmar la acción con SweetAlert
       Swal.fire({
         title: '¿Estás seguro de borrar los registros con la fecha ' + fechaSeleccionada + '?',
         icon: 'warning',
@@ -332,24 +331,27 @@
         cancelButtonText: 'No, cancelar'
       }).then((result) => {
         if (result.isConfirmed) {
-          // Hacer la solicitud para borrar registros
-          axios.delete(`http://localhost:3000/borrar-registros/${fechaSeleccionada}`)
-            .then((response) => {
-              Swal.fire({
-                icon: 'success',
-                title: '¡Borrado!',
-                text: response.data.message,
-              });
-              cargarHistorico(); // Volver a cargar los datos
-            })
-            .catch((error) => {
-              const errorMessage = error.response?.data.message || 'Hubo un error al borrar los registros';
-              Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: errorMessage,
-              });
+          const usuario = sessionStorage.getItem("usuario"); // Obtener el usuario de la sesión
+
+          axios.delete(`http://localhost:3000/borrar-registros/${fechaSeleccionada}`, {
+            data: { usuario } // Enviar el usuario en el cuerpo de la solicitud DELETE
+          })
+          .then((response) => {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Borrado!',
+              text: response.data.message,
             });
+            cargarHistorico(); // Volver a cargar los datos
+          })
+          .catch((error) => {
+            const errorMessage = error.response?.data.message || 'Hubo un error al borrar los registros';
+            Swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: errorMessage,
+            });
+          });
         }
       });
     });
