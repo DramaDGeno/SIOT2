@@ -548,6 +548,24 @@
       }
     });
   </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Obtener el rol desde sessionStorage
+      const rol = sessionStorage.getItem("rol");
+  
+      // Verificar si el rol es 0 y si la URL actual es para el rol 1
+      if (rol === "0") {
+        // Redirigir a registroOcupacion.html si el usuario tiene rol 0 y está en una página para el rol 1
+        const urlActual = window.location.href;
+        
+        // Puedes hacer una verificación simple de la URL
+        // Por ejemplo, si detectas que la URL corresponde a una página para el rol 1, redirigir
+        if (urlActual.includes("usuarios.html") || urlActual.includes("graficas.html") || urlActual.includes("historial.html") || urlActual.includes("operaciones.html")) {
+          window.location.href = "registroOcupacion.html";
+        }
+      }
+    });
+  </script>
 
 </body>
 
