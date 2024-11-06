@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registro de ocupación hotelera</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/stylehistorial.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+
+<style>
+  /* Estilo para el input de búsqueda */
+.search-container input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+  color: #555;
+  border-radius: 4px;
+  outline: none;
+  width: 100%;
+}
+
+.search-container input:focus {
+  border-color: #ccc; /* Mantener borde gris */
+  background-color: #f1f1f1; /* Mantener fondo gris */
+}
+
+/* Estilo para la paginación */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.pagination-container button {
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  color: #555;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination-container button:disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.pagination-container button:hover:not(:disabled) {
+  background-color: #e1e1e1;
+  border-color: #ddd;
+}
+
+.search-container {
+  margin-right: 8px; /* Ajusta el valor según el espacio que necesites */
+}
+
+#deleteRecordsBtn {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-hotel"></i> Sistema de Ocupación Hotelera
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto" id="navbarItems">
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitaciones
+            reservadas </button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='historial.html'">Registros</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" onclick="location.href='operaciones.html'">Historial Operaciones</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+      </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Título y línea de separación -->
+  <div class="header">
+    <h1>Historial de Operaciones</h1>
+    <div class="separator"></div>
+  </div>
+ 
+
+  
+  <div class="content-section container mt-4">
+    <div class="row d-flex">
+      <div class="col-lg-12 col-md-12 mb-4 box-left p-4">
+        
+        <!-- Contenedor de búsqueda y botón "Borrar registros" -->
+        <div class="d-flex align-items-stretch mb-3">
+          <div class="search-container flex-grow-1 me-2">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar..." />
+          </div>
+        </div>
+        
+        <!-- Tabla de historial -->
+        <table id="historial-table" class="table">
+          <thead>
+            <tr>
+                <th onclick="sortTable(0)">Operación ▼</th>
+                <th>Fecha Operación</th>
+                <th>Usuario</th>
+              <th>Fecha</th>
+              <th>Tipo de Habitación</th>
+              <th>Habitaciones Ocupadas</th>
+              <th>Habitaciones Totales</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Las filas se llenarán dinámicamente aquí -->
+          </tbody>
+        </table>
+        
+        <!-- Contenedor de paginación -->
+        <div class="pagination-container">
+          <button id="prevPage" disabled>Anterior</button>
+          <span id="pageInfo"></span>
+          <button id="nextPage">Siguiente</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table/dist/bootstrap-table.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="/auth.js"></script> 
+  <script src="paginationoperaciones.js"></script> 
+ 
+  <script>
+    // Función para cargar los datos históricos
+    function cargarHistoricoOperaciones() {
+      fetch('http://127.0.0.1:3000/api/operaciones')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al obtener el historial');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const tableBody = document.querySelector('#historial-table tbody');
+          tableBody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+  
+          data.forEach(item => {
+            const fechaFormateada = new Date(item.fecha).toLocaleDateString(); // Formato legible
+            const row = `<tr>
+                          <td>${item.tipooperacion}</td>
+                          <td>${item.fechaoperacion}</td>
+                          <td>${item.usuario}</td>
+                          <td>${fechaFormateada}</td>
+                          <td>${item.tipo}</td>
+                          <td>${item.habitacionesocupadas}</td>
+                          <td>${item.habitacionestotales}</td>
+                        </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row); // Agregar la fila a la tabla
+          });
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudieron cargar los datos históricos.'
+          });
+        });
+    }
+  
+    // Llamar a cargarHistorico al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarHistoricoOperaciones);
+  </script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener el rol desde sessionStorage
+        const rol = sessionStorage.getItem('rol');
+
+        // Seleccionar el contenedor del navbar
+        const navbarItems = document.getElementById('navbarItems');
+
+        if (rol === '1') {
+            // Si el rol es 1 (administrador), mostrar todos los elementos
+            navbarItems.innerHTML = `
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='graficas.html'">Visualizar gráficas</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='historial.html'">Registros</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='usuarios.html'">Gestión de usuarios</button>
+                </li>
+                 <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='operaciones.html'">Historial Operaciones</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                </li>
+            `;
+        } else if (rol === '0') {
+            // Si el rol es 0 (usuario normal), mostrar solo 'Registrar habitación' y 'Cerrar sesión'
+            navbarItems.innerHTML = `
+                <li class="nav-item">
+                    <button class="btn btn-dark" onclick="location.href='registroOcupacion.html'">Registrar habitación</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark" id="logoutBtn">Cerrar sesión</button>
+                </li>
+            `;
+        }
+
+        // Asignar el evento de click al botón de cerrar sesión
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                sessionStorage.removeItem('rol'); // Eliminar el rol de la sesión
+                sessionStorage.removeItem('usuario'); // Eliminar el usuario de la sesión
+                window.location.href = "login.html"; // Redirigir al login
+            });
+        }
+    });
+</script>
+<script>
+    let sortOrder = true; // true para ascendente, false para descendente
+
+function sortTable(columnIndex) {
+  const table = document.getElementById("historial-table");
+  const rows = Array.from(table.rows).slice(1); // Obtener todas las filas de la tabla, excepto la cabecera
+
+  rows.sort((rowA, rowB) => {
+    const cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
+    const cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
+
+    // Comparar los valores de las celdas para ordenarlos alfabéticamente
+    if (cellA < cellB) return sortOrder ? -1 : 1;
+    if (cellA > cellB) return sortOrder ? 1 : -1;
+    return 0;
+  });
+
+  // Revertir el orden de los datos para la próxima vez
+  sortOrder = !sortOrder;
+
+  // Volver a insertar las filas en la tabla
+  rows.forEach(row => table.appendChild(row));
+}
+
+</script>
+</body>
+</html>

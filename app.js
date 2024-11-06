@@ -56,11 +56,9 @@ app.post("/login", (req, res) => {
       req.session.rol = rol; // Almacena el rol en la sesión
       return res.status(200).send({ message: "Inicio de sesión exitoso", rol });
     } else {
-      return res
-        .status(401)
-        .send({
-          message: "Usuario o contraseña incorrectos o cuenta desactivada",
-        });
+      return res.status(401).send({
+        message: "Usuario o contraseña incorrectos o cuenta desactivada",
+      });
     }
   });
 });
@@ -395,32 +393,40 @@ app.get("/api/historial", (req, res) => {
 
 app.delete("/borrar-registros/:fecha", async (req, res) => {
   const fecha = req.params.fecha;
-  const usuario = req.body.usuario; 
+  const usuario = req.body.usuario;
   const fechaOperacion = new Date(new Date().getTime());
 
   try {
     // Verificar registros en historico
     const checkHistoricoQuery = "SELECT * FROM historico WHERE fecha = ?";
-    const [historicoResults] = await db.promise().query(checkHistoricoQuery, [fecha]);
+    const [historicoResults] = await db
+      .promise()
+      .query(checkHistoricoQuery, [fecha]);
 
     if (historicoResults.length === 0) {
-      return res.status(404).send({ message: `No se encontraron registros en historico para la fecha ${fecha}` });
+      return res
+        .status(404)
+        .send({
+          message: `No se encontraron registros en historico para la fecha ${fecha}`,
+        });
     }
 
     // Insertar en historialoperaciones antes de borrar
-    const insertPromises = historicoResults.map(record => {
+    const insertPromises = historicoResults.map((record) => {
       const insertQuery = `
         INSERT INTO historialoperaciones (idtipo, fecha, habitacionesocupadas, habitacionestotales, usuario, fechaoperacion, tipooperacion)
         VALUES (?, ?, ?, ?, ?, ?, 'ELIMINACION')
       `;
-      return db.promise().query(insertQuery, [
-        record.idtipo,
-        record.fecha,
-        record.habitacionesocupadas,
-        record.habitacionestotales,
-        usuario,
-        fechaOperacion,
-      ]);
+      return db
+        .promise()
+        .query(insertQuery, [
+          record.idtipo,
+          record.fecha,
+          record.habitacionesocupadas,
+          record.habitacionestotales,
+          usuario,
+          fechaOperacion,
+        ]);
     });
 
     await Promise.all(insertPromises);
@@ -431,21 +437,49 @@ app.delete("/borrar-registros/:fecha", async (req, res) => {
 
     // Verificar y borrar registros en estadistica
     const checkEstadisticaQuery = "SELECT * FROM estadistica WHERE fecha = ?";
-    const [estadisticaResults] = await db.promise().query(checkEstadisticaQuery, [fecha]);
+    const [estadisticaResults] = await db
+      .promise()
+      .query(checkEstadisticaQuery, [fecha]);
 
     if (estadisticaResults.length > 0) {
       const deleteEstadisticaQuery = "DELETE FROM estadistica WHERE fecha = ?";
       await db.promise().query(deleteEstadisticaQuery, [fecha]);
     }
 
-    res.status(200).send({ message: `Registros borrados para la fecha ${fecha}` });
-
+    res
+      .status(200)
+      .send({ message: `Registros borrados para la fecha ${fecha}` });
   } catch (error) {
     console.error("Error en el proceso de eliminación:", error);
-    res.status(500).send({ message: "Error interno al procesar la eliminación de registros" });
+    res
+      .status(500)
+      .send({
+        message: "Error interno al procesar la eliminación de registros",
+      });
   }
 });
 
+// Ruta para obtener todos los historial de operaciones
+app.get("/api/operaciones", (req, res) => {
+  const consulta = `
+    SELECT idhistoperacion, tipo, 
+           DATE_FORMAT(fechaoperacion, '%Y-%m-%d %H:%i:%s') AS fechaoperacion, 
+           fecha, habitacionesocupadas, habitacionestotales, usuario, tipooperacion
+    FROM tipohabitacion a
+    INNER JOIN historialoperaciones b ON a.idtipo = b.idtipo
+    ORDER BY idhistoperacion`;
+
+  db.query(consulta, (error, results) => {
+    if (error) {
+      console.error("Error al obtener las operaciones realizadas:", error);
+      res
+        .status(500)
+        .json({ message: "Error al obtener el historial de operación" });
+    } else {
+      res.json(results); // Enviar los usuarios activos como respuesta en formato JSON
+    }
+  });
+});
 
 app.post("/guardar-historico", (req, res) => {
   const { fecha, habitaciones, usuario } = req.body; // Ahora recibimos 'usuario'
@@ -621,11 +655,9 @@ app.post("/guardar-historico", (req, res) => {
                 [fecha, porcentaje, mes],
                 (err) => {
                   if (err) {
-                    return res
-                      .status(500)
-                      .send({
-                        message: "Error al insertar en la tabla estadistica",
-                      });
+                    return res.status(500).send({
+                      message: "Error al insertar en la tabla estadistica",
+                    });
                   }
 
                   // Respuesta exitosa
